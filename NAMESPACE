@@ -1,0 +1,2 @@
+useDynLib(ArmaUtils)
+exportPattern("^[[:alpha:]]+")
