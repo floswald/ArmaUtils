@@ -7,4 +7,5 @@ install
 -------
 
 ``git pull git://github.com/floswald/ArmaUtils.git``
+
 ``R CMD INSTALL Armautils``
