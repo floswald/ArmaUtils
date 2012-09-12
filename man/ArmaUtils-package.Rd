@@ -2,14 +2,12 @@
 \alias{ArmaUtils-package}
 \alias{ArmaUtils}
 \docType{package}
-\title{Fast Armadillo Helper Functions}
+\title{Fast RcppArmadillo Helper Functions}
 
-\description{Implements 2 functions. \code{armamax} is a fast implementation of \code{apply(X,1,max)}, that returns a list with 2 vectors \bold{values}
- and \bold{indices}, containing maximal values and indices for each row. (If you want it for each column, just transpose the matrix). 
+\description{Implements 2 functions \code{armamax} and \code{armakron}. The first one is a fast implementation of \code{list(values=apply(A,1,max),indice=apply(A,1,which.max)} each row. (If you want it for each column, just transpose the matrix). 
 One can optionally specify an index vector \code{inds}, that limits the search range in each row j, i.e. instead of comparing all indices, 
 only the ones after \code{inds(j)} are taken into account.\cr 
-The second is \code{armakron}, which is an efficient algorithm for calculating the product \code{A * y}, where \code{A} is the (large) kronecker product of M matrices mat1,...,matM, 
-each of dimension (ni x ni), \eqn{i=1,\dots,M}, and \code{y} a compatible vector of length \eqn{N = n1*n2*\dots*nM}}
+The second is \code{armakron}, which is an efficient algorithm for calculating the product \code{A * y}, where \code{A} is the (large) kronecker product of M matrices \eqn{mat_1,...,mat_M}, each of dimension \eqn{n_i x n_i,i=1,\dots,M}, and \code{y} a compatible vector of length \eqn{N = n_1*n_2*\dots*n_M}}
 
 \details{
 \tabular{ll}{
@@ -19,13 +17,13 @@ Version: \tab 1.0\cr
 Date: \tab 2012-09-11\cr
 License: \tab What license is it under?\cr
 }
-~~ An overview of how to use the package, including the most important functions ~~
+See \code{"\link[=ArmaUtils]{armamax}"} and \code{"\link[=ArmaUtils]{armakron}"} for help on both functions.
+
 }
 \author{florian.oswald@gmail.com}
 
 \references{C. De Boor. Efficient computer manipulation of tensor products. ACM Transactions on Mathematical Software (TOMS), 5(2):173-182, 1979}
 \keyword{ package }
-\seealso{~~ \code{\link[<pkg>:<pkg>-package]{<pkg>}} ~~}
 
 \examples{
 ## not run

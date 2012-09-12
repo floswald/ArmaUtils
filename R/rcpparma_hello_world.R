@@ -1,5 +1,10 @@
 
 
+### Roxygen Documentation
+#' Fast RcppArmadillo Helper Functions
+#'
+#' 
+
 armamax <- function(A,b=NULL){
 	if (is.null(b)) {
 		.Call( "armamax", A, PACKAGE = "ArmaUtils" )

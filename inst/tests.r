@@ -1,14 +1,129 @@
 
 
+library(rbenchmark)
+
 # test file for ArmaUtils package
+# ===============================
 
-# armamax is a fast implementation of apply(X,1,max), that returns a list with 2 vectors 'values' and 'indices', containing maximal values and indices for each row.
+# Armamax
+# -------
 
-A <- matrix(rnorm(20),nrow=4,ncol=5)
+#### Useage 1: find the unrestricted maximal element for each row of a matrix
+
+A <- matrix(rnorm(200000),nrow=400,ncol=500)
+result <- armamax(A)
+all.equal(apply(A,1,max),as.numeric(result$values))	# TRUE
+all.equal(apply(A,1,which.max),as.numeric(result$indices))	# TRUE
+
+# benchmark against 2 calls to apply(), one for values, one for indices
+bmk.cols <- c("test","replications","elapsed","relative","user.self","sys.self")
+benchmark(R=list(apply(A,1,max),apply(A,1,which.max)),armamax=armamax(A),replications=50,columns=bmk.cols)
+
+# benchmark against 1 call to apply() only
+benchmark(R=apply(A,1,max),armamax=armamax(A),replications=50,columns=bmk.cols)
 
 
-apply(A,1,max)
+
+#### Useage 2: find the REstricted maximal element for each row of a matrix
+
+# there is a vector b of length nrow(A), holding an integer in 0,...,ncol(A)-1 that indicates how many indices starting from the left are to be excluded from the maximization process. E.g. if b(i) = 3, this means that the routine does max(A[i,-c(1,2,3)])
+
+A <- matrix(replicate(n=4,sample(1:5,size=5,replace=F)),nrow=4,ncol=5,byrow=T)
+A
+
+b <- sample(0:(ncol(A)-1),size=nrow(A),replace=TRUE)
+b
+
+rfun <- function(A,b){
+	R.result <- list()
+	R.result$values  <- c()
+	R.result$indices <- c()
+	for (i in 1:nrow(A)){
+		R.result$values[i]  <- max(A[i,(b[i]+1):ncol(A)])
+		R.result$indices[i] <- which.max(A[i,(b[i]+1):ncol(A)]) + b[i]
+	}
+	return(R.result)
+}
+
+all.equal(R.result$values,as.numeric(armamax(A,b)$values))
+all.equal(R.result$indices,as.numeric(armamax(A,b)$indices))
+
+A <- matrix(replicate(n=4000,sample(1:500,size=500,replace=F)),nrow=4000,ncol=500,byrow=T)
+
+b <- sample(0:(ncol(A)-1),size=nrow(A),replace=TRUE)
+
+benchmark(R=rfun(A,b),arma=armamax(A,b),replications=5,columns=bmk.cols)
 
 
 
+# Armakron
+# --------
 
+x1 <- matrix(rnorm(25),nrow=5,ncol=5)
+x2 <- matrix(rnorm(9),nrow=3,ncol=3)
+x3 <- matrix(rnorm(4),nrow=2,ncol=2)
+y  <- rnorm(5*3*2)
+
+R.kron   <- kronecker(x3,kronecker(x2,x1))	# form R kronecker product. impossible beyond a certain size
+R.result <- R.kron %*% y
+
+Arma.result <- armakron(y=y,list(x1,x2,x3))	# armakron() computes result directly without forming kronecker product
+
+all.equal(R.result,Arma.result)		# TRUE
+
+# spline example: estimate spline coefficients on kronecker product of 3 univariate spline basis x,y and z.
+library(splines)
+
+# degrees
+dx <- 3
+dy <- 3
+dz <- 3
+
+# knots
+kx <- c(rep(0,times=dx),seq(0,1,length=17),rep(1,times=dx))
+ky <- c(rep(1,times=dy),seq(1,10,length=8),rep(10,times=dy))
+kz <- c(rep(-3,times=dz),seq(-3,3,length=11),rep(3,times=dz))
+
+# evaluation points: choose such that # of datapoints is equal # of coefficients
+# the algorithm works ONLY with square systems, i.e. number of data points must be equal number of spline coefficients!
+x <- seq(0,1,length=length(kx)-dx-1)
+y <- seq(1,10,length=length(ky)-dy-1)
+z <- seq(-3,3,length=length(kz)-dz-1)
+
+# basis matrices
+X <- splineDesign(x=x,knots=kx,ord=dx+1)
+Y <- splineDesign(x=y,knots=ky,ord=dy+1)
+Z <- splineDesign(x=z,knots=kz,ord=dz+1)
+
+# data generating process
+dgp <- function(x) x[1]^2 + x[2]^3 + x[1]*x[2]*x[3]
+
+# create sample of data:
+vals <- apply(expand.grid(x,y,z),1,dgp)
+
+# plot a slice
+persp(array(vals,dim=c(length(x),length(y),length(z)))[ , ,5],theta=100)
+
+# estimate spline coefficients to be able to evaluate dgp off the grid
+# the problem is: 
+# kronprod %*% coefs = vals, where kronprod = kronecker(Z,kronecker(Y,X))
+#              coefs = inv(kronprod) %*% vals
+#
+# often the forming of kronprod is infeasible because of memory limitations. If not that, then computing the inverse
+# is very costly. The algorithm in armakron never forms the kronprod. Instead we give it the inverse matrices one by one:
+
+library(MASS)	# adds ginv()
+coefs <- armakron(y=vals,matrices=list(ginv(X),ginv(Y),ginv(Z)))
+
+# check against R
+kron <- kronecker(Z,kronecker(Y,X))
+r.coefs <- solve(kron,vals)	# takes couple of seconds already.
+
+all.equal(as.numeric(coefs),r.coefs)	# TRUE
+
+# predict the grid. 
+pred <- armakron(y=coefs,matrices=list(X,Y,Z))
+all.equal(as.numeric(pred),vals)	# TRUE
+
+
+# armakron is not suitable for prediction, since basis need to be square. See FunctionApproximation (Ypma, 2011)
