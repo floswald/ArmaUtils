@@ -59,6 +59,7 @@ SEXP armakron( SEXP y_, SEXP R_ ){
 	Rcpp::List mats(R_);
 	int nmat =  mats.length();	// how many matrices
 	int nall = y.size();
+	vec cols(nmat);
 
 	// need to map to arma::mat type
 	std::vector<mat> list;
@@ -68,7 +69,16 @@ SEXP armakron( SEXP y_, SEXP R_ ){
 		if ( !list.at(i).is_square() ){
 			throw std::logic_error( "armakron: not all matrices are square!" );
 		}
+		// fill in dimensions
+		cols(i) = list.at(i).n_cols;
 	}
+
+	if ( prod(cols) != nall ){
+		throw std::logic_error( "armakron: prod(cols(matrices)) not equal length(y)" );
+		return wrap(NULL);
+	}
+
+	// TODO do a sanity check on dimensions of objects!!
 
 	// product for first matrix
 	vec y0 = y;

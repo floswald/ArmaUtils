@@ -20,8 +20,12 @@ Eigen::VectorXd KronProdSPMat4(
 
 	Eigen::VectorXd retvec;
 	retvec.setZero( a0.rows() * a1.rows() * a2.rows() * a3.rows()  );
-	if ( y.rows() != a0.cols() * a1.cols() * a2.cols()  * a3.cols()  ) {
-		std::cout << "KronProdMat5 error: y and matrices not conformable" << std::endl;
+	if ( y.size() != a0.cols() * a1.cols() * a2.cols()  * a3.cols()  ) {
+		Rcpp::Rcout << "y.size()"  << std::endl;
+		Rcpp::Rcout <<  y.size() << std::endl;
+		Rcpp::Rcout << "a0.cols() * a1.cols() * a2.cols()  * a3.cols()" << std::endl;
+		Rcpp::Rcout <<  a0.cols() * a1.cols() * a2.cols()  * a3.cols() << std::endl;
+		Rcpp::Rcout << "ArmaUtils::krons::KronProdMat4 error: y and matrices not conformable" << std::endl;
 	}
 
 	//loop rows a0
