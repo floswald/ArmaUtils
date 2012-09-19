@@ -1,7 +1,6 @@
 
 \name{armakron}
 \alias{armakron}
-\docType{package}
 \title{RcppArmadillo algorithm to compute large Kronecker Products}
 
 \description{Implements the DeBoor (1979) algorithm to compute the product \code{A * y}, where \code{A} is the (large) kronecker product of M matrices \eqn{mat_1,...,mat_M}, each of dimension \eqn{n_i x n_i,i=1,\dots,M}, and \code{y} is a compatible vector of length \eqn{N = n_1*n_2*\dots*n_M}}

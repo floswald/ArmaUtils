@@ -1,12 +1,12 @@
 Package: ArmaUtils
 Type: Package
-Title: Fast Armadillo Helper Functions
+Title: Rcpp Helper Functions 
 Version: 1.0
 Date: 2012-09-11
 Author: Florian Oswald
 Maintainer: Florian Oswald <florian.oswald@gmail.com>
-Description: Implements 2 functions using RcppArmadillo tools
+Description: Implements several functions using RcppArmadillo tools
 License: What license is it under?
-Depends: Rcpp (>= 0.9.13), RcppArmadillo (>= 0.3.4.0)
+Depends: Rcpp (>= 0.9.13), RcppArmadillo (>= 0.3.4.0), RcppEigen
 Suggests: testthat
-LinkingTo: Rcpp, RcppArmadillo
+LinkingTo: Rcpp, RcppArmadillo, RcppEigen

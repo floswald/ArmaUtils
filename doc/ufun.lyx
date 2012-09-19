@@ -1,0 +1,237 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass article
+\begin_preamble
+\usepackage{natbib}
+\usepackage{url}
+\end_preamble
+\use_default_options true
+\begin_modules
+knitr
+\end_modules
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize 11
+\spacing single
+\use_hyperref false
+\papersize a4paper
+\use_geometry true
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 1
+\use_mathdots 1
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\use_refstyle 0
+\boxbgcolor #dbdbdb
+\branch answer
+\selected 1
+\filename_suffix 0
+\color #faf0e6
+\end_branch
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 2cm
+\rightmargin 2cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation skip
+\defskip smallskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Cobb douglas utility function 
+\begin_inset Formula $u(c,h,\theta,t)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Definition
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+u(c,h,H,\theta,t) & = & \frac{\left(\left(\frac{c}{n_{t}}\right)^{\alpha}\left(\frac{g(h)}{n_{t}}\right)^{1-\alpha}\right)^{1-\sigma}-1}{1-\sigma}\\
+g\left(h\right) & = & \begin{cases}
+h & \text{if }H=0\\
+h\theta & \text{if }H=1
+\end{cases}
+\end{eqnarray*}
+
+\end_inset
+
+factor family size as
+\begin_inset Formula 
+\begin{eqnarray*}
+u(c,h,H,\theta,t) & = & \left(n_{t}\right)^{\sigma-1}\frac{c^{\alpha(1-\sigma)}g(h)^{(1-\alpha)(1-\sigma)}-1}{1-\sigma}\\
+ & = & \frac{\left(n_{t}\right)^{\sigma-1}}{1-\sigma}\left(g(c,h,H)-1\right)
+\end{eqnarray*}
+
+\end_inset
+
+ 
+\begin_inset Formula 
+\begin{eqnarray*}
+g(c,h,H) & = & c^{\alpha(1-\sigma)}g(h)^{(1-\alpha)(1-\sigma)}
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+First Derivative w.r.t.
+ c
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+u_{c}(c,h,H,\theta,t) & = & \left(n_{t}\right)^{\sigma-1}\alpha c^{\alpha(1-\sigma)-1}g(h)^{(1-\alpha)(1-\sigma)}\\
+ & = & \left(n_{t}\right)^{\sigma-1}\alpha\frac{g(c,h,H)}{c}
+\end{eqnarray*}
+
+\end_inset
+
+Second Derivative
+\begin_inset Formula 
+\begin{eqnarray*}
+u_{cc}(c,h) & = & \frac{d}{dc}\left(n_{t}\right)^{\sigma-1}\alpha c^{\alpha(1-\sigma)-1}g(h)^{(1-\alpha)(1-\sigma)}\\
+ & = & \alpha\left(\alpha(1-\sigma)-1\right)\left(n_{t}\right)^{\sigma-1}c^{\alpha(1-\sigma)-2}g(h)^{(1-\alpha)(1-\sigma)}\\
+ & = & \left(\alpha(1-\sigma)-1\right)\frac{u_{c}(c,h,\theta,t)}{c}
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Derivative wr.t h
+\begin_inset Formula 
+\begin{eqnarray*}
+u_{h}(c,h,H,\theta,t) & = & \left(n_{t}\right)^{\sigma-1}(1-\alpha)c^{\alpha(1-\sigma)}g(h)^{(1-\alpha)(1-\sigma)-1}\frac{dg}{dh}\\
+ & = & \left(n_{t}\right)^{\sigma-1}(1-\alpha)\frac{g(c,h,H)}{h}\frac{dg}{dh}
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Implementation
+\end_layout
+
+\begin_layout Standard
+build in quadratic approximation to consumption values smaller than 0.
+ precompute the following parameters
+\begin_inset Formula 
+\begin{eqnarray}
+\xi_{1,t} & = & \left(n_{t}\right)^{\sigma-1}\label{eq:xi1}\\
+\xi_{2,t} & = & \frac{\left(n_{t}\right)^{\sigma-1}}{1-\sigma}\label{eq:xi2}\\
+\xi_{3} & = & \alpha(1-\sigma)\label{eq:xi3}\\
+\xi_{4} & = & (1-\alpha)(1-\sigma)\label{eq:xi4}\\
+\xi_{5} & = & \left(\alpha(1-\sigma)-1\right)\label{eq:xi5}
+\end{eqnarray}
+
+\end_inset
+
+then, given arguments 
+\begin_inset Formula $(c,h,H,t)$
+\end_inset
+
+ compute
+\begin_inset Formula 
+\begin{equation}
+g(c,h,H)=c^{\xi_{3}}g(h)^{\xi_{4}}\label{eq:g}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+if 
+\begin_inset Formula $c<c^{*}$
+\end_inset
+
+, compute
+\begin_inset Formula 
+\begin{eqnarray}
+u_{c}(c,h,H,\theta,t) & = & \xi_{1,t}\alpha g(c,h,H)\label{eq:c-grad}\\
+u_{cc}(c,h,H,\theta,t) & = & \xi_{5}\frac{u_{c}(c,h,H,t)}{c}\label{eq:c-hess}
+\end{eqnarray}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+and return 
+\begin_inset Formula 
+\begin{eqnarray}
+\tilde{u} & = & \xi_{2,t}\left(g(c^{*},h,H)-1\right)+u_{c}(c^{*},h,H,t)(c-c^{*})+0.5u_{cc}(c^{*},h,H,t)(c-c^{*})^{2}\label{eq:approx}
+\end{eqnarray}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+else, return
+\begin_inset Formula 
+\begin{eqnarray}
+u & = & \xi_{2,t}\left(g(c,h,H)-1\right)\label{eq:true}
+\end{eqnarray}
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

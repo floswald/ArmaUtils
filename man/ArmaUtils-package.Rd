@@ -2,12 +2,17 @@
 \alias{ArmaUtils-package}
 \alias{ArmaUtils}
 \docType{package}
-\title{Fast RcppArmadillo Helper Functions}
+\title{Fast RcppArmadillo and RcppEigen Helper Functions for Dynamic Programming problems}
 
-\description{Implements 2 functions \code{armamax} and \code{armakron}. The first one is a fast implementation of \code{list(values=apply(A,1,max),indice=apply(A,1,which.max)} each row. (If you want it for each column, just transpose the matrix). 
-One can optionally specify an index vector \code{inds}, that limits the search range in each row j, i.e. instead of comparing all indices, 
-only the ones after \code{inds(j)} are taken into account.\cr 
-The second is \code{armakron}, which is an efficient algorithm for calculating the product \code{A * y}, where \code{A} is the (large) kronecker product of M matrices \eqn{mat_1,...,mat_M}, each of dimension \eqn{n_i x n_i,i=1,\dots,M}, and \code{y} a compatible vector of length \eqn{N = n_1*n_2*\dots*n_M}}
+\description{Implements several functions useful for discrete and continuous state dynamic programming. A prototypical problem would be to approximate
+V(S) = max_x u(S,x) + b * V(S'|S,x) where S stands for the state space, x for control variables, V() and u() are real valued functions. The package is useful if S is large. 
+It has the following functionality: \cr
+\tabular{ll}{
+compute u(): \tab \code{\link{utilfun}} efficiently computes different forms of u(S,x) at each point of kronecker(S,x)\cr
+max u(S,x) + b * V(S'|S,x): \tab \code{\link{armamax}} finds the pointwise maximum at each S, optionally observing a restriction on the search space \cr
+approximate V(S'): \tab \code{\link{armakron}} computes approximating B-spline coefficients on high-dimensional kronecker products of univariate basis functions \cr
+evaluate approximations of V(S'): \tab \code{\link{krons}} evaluate high-dimensional kronecker products to obtain an approximation to V(S')\cr
+}}
 
 \details{
 \tabular{ll}{
@@ -17,18 +22,16 @@ Version: \tab 1.0\cr
 Date: \tab 2012-09-11\cr
 License: \tab What license is it under?\cr
 }
-See \code{"\link[=ArmaUtils]{armamax}"} and \code{"\link[=ArmaUtils]{armakron}"} for help on both functions.
 
 }
 \author{florian.oswald@gmail.com}
 
-\references{C. De Boor. Efficient computer manipulation of tensor products. ACM Transactions on Mathematical Software (TOMS), 5(2):173-182, 1979}
+\references{C. De Boor. Efficient computer manipulation of tensor products. ACM Transactions on Mathematical Software (TOMS), 5(2):173-182, 1979\cr
+M. Miranda and P. Fackler. Applied computational economics and finance. MIT Press, 2002}
 \keyword{ package }
 
 \examples{
-## not run
-# armakron()
-
+\dontrun{
 x1 <- matrix(rnorm(25),nrow=5,ncol=5)
 x2 <- matrix(rnorm(9),nrow=3,ncol=3)
 x3 <- matrix(rnorm(4),nrow=2,ncol=2)
@@ -45,6 +48,5 @@ all.equal(R.result,Arma.result)		# TRUE
 result <- armamax(x1)
 all.equal(apply(x1,1,max),as.numeric(result$values))	# TRUE
 all.equal(apply(x1,1,which.max),as.numeric(result$indices))	# TRUE
-
-## end not run
+}
 }

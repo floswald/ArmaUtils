@@ -1,7 +1,7 @@
 ArmaUtils
 =========
 
-contains R package ArmaUtils, which currently consists of 2 RcppArmadillo helper functions for computationally intensive projects.
+contains R package ArmaUtils, which implements 4 Rcpp helper functions for the bankruptcy project. 2 of them might be useful.
 
 install
 -------

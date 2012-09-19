@@ -1,6 +1,5 @@
 \name{armamax}
 \alias{armamax}
-\docType{package}
 \title{RcppArmadillo row-wise Matrix Optimizer}
 
 \description{Finds the row-wise maximum of a matrix \code{A}, and returns a list with optimal values and their position in each row. 

@@ -127,3 +127,64 @@ all.equal(as.numeric(pred),vals)	# TRUE
 
 
 # armakron is not suitable for prediction, since basis need to be square. See FunctionApproximation (Ypma, 2011)
+
+
+
+
+
+
+# test files
+library(ArmaUtils)
+
+# test utility function 1
+# =======================
+
+pars <- list(alpha=0.6,sigma=1.6,cutoff=0.05,theta=1.1)
+maxage <- 10
+fsize <- seq(1,3,le=maxage)
+xi <- list()
+xi[[1]]    <- fsize^(pars$sigma -1)
+xi[[2]]    <- xi[[1]] / (1-pars$sigma)
+xi[[3]]    <- pars$alpha*(1-pars$sigma)
+xi[[4]]    <- (1-pars$alpha)*(1-pars$sigma)
+xi[[5]]    <- pars$alpha*(1-pars$sigma) -1 
+
+Res  <- outer(1:4,5:-1)
+
+utilfun(Resources=Res,hsize=2,age=4,params=pars,xi=xi,own=TRUE)
+utilfun(Resources=Res,hsize=2,age=4,params=pars,xi=xi,own=FALSE)
+utilfun(Resources=Res,hsize=1:4,age=4,params=pars,xi=xi,own=FALSE)
+utilfun(Resources=Res,hsize=1:5,age=4,params=pars,xi=xi,own=FALSE)	# error message: too many house sizes.
+
+
+
+
+# test kron
+# =========
+
+# 4 dimensions
+
+# make R data
+a = matrix(c(1,2,3,4,5,0,0,6,0,0,0,7,8,0,9,0,0,0,10,0),nrow=5,ncol=4,byrow=T)
+b <- matrix(c(1,2,0,0,0,3),nrow=2,ncol=3,byrow=T)
+c <- matrix(c(0,1,0,3,4,0),nrow=3,ncol=2,byrow=T)
+d <- matrix(c(0,1,2,0,2,0,0,1),nrow=2,ncol=4,byrow=T)
+aa = as(a,"dgCMatrix")
+bb = as(b,"dgCMatrix")
+cc = as(c,"dgCMatrix")
+dd = as(d,"dgCMatrix")
+y <- as.numeric(1:(ncol(aa)*ncol(bb)*ncol(cc)*ncol(dd)))
+
+kron.result <- krons(matrices=list(aa,bb,cc,dd),y=y)
+
+# test with 4 dimensions. 
+# ------------------------
+
+# R kronecker product
+r.result <- kronecker(aa,kronecker(bb,kronecker(cc,dd))) %*% y
+
+# check output
+all.equal(as.numeric(r.result),c.result)
+
+
+
