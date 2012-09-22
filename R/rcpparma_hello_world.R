@@ -177,6 +177,7 @@ armakron <- function(y,matrices){
 
 
 utilfun <- function( Resources, hsize, age, params, xi, own ){
+	if (is.null(dim(Resources))) Resources <- matrix(Resources,nrow=length(Resources),ncol=1)
 	.Call( "utilfun", Resources, hsize, age, params, xi, own, PACKAGE = "ArmaUtils" )
 }
 
