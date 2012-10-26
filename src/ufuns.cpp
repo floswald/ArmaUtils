@@ -81,5 +81,66 @@ SEXP utilfun( SEXP Res_, SEXP s_, SEXP age_, SEXP par_, SEXP xi_, SEXP own_ )
 }
 
 
+// u(c,h,age) as in Attansio et al. Review of economic dynamics 2012
+SEXP ufun_Attanasio( SEXP Res_, SEXP s_, SEXP par_)
+{
+	mat Res = Rcpp::as<arma::mat>(Res_);
+	int size = Rcpp::as<int>(s_);
+
+	//par_ = list(gamma,theta,phival,mu,cutoff)
+
+	// now get parameters out of lists par 
+	Rcpp::List par( par_ ) ;
+
+	double gamma = Rcpp::as<double>(par["gamma"]);
+	double theta = Rcpp::as<double>(par["theta"]);
+	double cutoff = Rcpp::as<double>(par["cutoff"]);
+	double phival = Rcpp::as<double>(par["phival"]);
+	double mu = Rcpp::as<double>(par["mu"]);
+	double mgamma = 1-gamma;
+	double imgamma = 1/mgamma;
+
+	//setup output matrix
+	mat ret(Res);
+	int n = ret.n_rows;
+	int m = ret.n_cols;
+	ret.zeros();
+	double diff, g, u, grad, hess;
+	double phi = 0;
+	if (size == 1) {
+		phi = phival;
+	} else if (size == 2) {
+		phi = 1;
+	}
+	double hfac = exp( theta * phi );
+	rowvec tmpvec(m);
+
+	// compute utility from non-durable consumption
+	for (int i=0; i<n; i++){
+		if( Res(i,m-1) < cutoff ){	// check if the last entry in row i is below cutoff. if last is not, none is. Res = c - savings, savings increase to the right.
+			for (int j=0; j<m; j++){
+				if( Res(i,j) < cutoff ){ // compute approximated utility at all entries of row i below cutoff
+					g        = pow(cutoff,mgamma);	 
+					grad     = g / cutoff;   
+					hess     = -gamma * grad / cutoff;	
+					diff     = Res(i,j) - cutoff;
+					ret(i,j) = imgamma*g + (grad * diff) + 0.5 * hess * pow(diff,2);
+				} else {
+					g = pow(Res(i,j),mgamma);	  
+					ret(i,j) = imgamma * g;	    
+				}
+			}
+		} else {
+			tmpvec = pow(Res.row(i),mgamma);   // equation (6)
+			ret.row(i) = imgamma * tmpvec;    // equation (11)
+		}
+	}
+	// add additive premium if houseing is of right size
+	ret = ret * hfac;
+	if (size != 0){
+		ret = ret + mu * phi;
+	}
+	return wrap(ret);
+}
 
 

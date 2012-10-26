@@ -176,11 +176,17 @@ armakron <- function(y,matrices){
 
 
 
+
 utilfun <- function( Resources, hsize, age, params, xi, own ){
 	if (is.null(dim(Resources))) Resources <- matrix(Resources,nrow=length(Resources),ncol=1)
 	.Call( "utilfun", Resources, hsize, age, params, xi, own, PACKAGE = "ArmaUtils" )
 }
 
+
+ufun_Atta <- function( Resources, hsize, params ){
+	if (is.null(dim(Resources))) Resources <- matrix(Resources,nrow=length(Resources),ncol=1)
+	.Call( "ufun_Attanasio", Resources, hsize, params, PACKAGE = "ArmaUtils" )
+}
 
 # takes y and a list of matrices to compute kronecker of matrics times y. matrices can be sparse or dense (not implemented)
 krons <- function( y, matrices ){
