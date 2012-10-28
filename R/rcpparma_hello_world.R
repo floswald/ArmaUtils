@@ -185,6 +185,7 @@ utilfun <- function( Resources, hsize, age, params, xi, own ){
 
 ufun_Atta <- function( Resources, hsize, params ){
 	if (is.null(dim(Resources))) Resources <- matrix(Resources,nrow=length(Resources),ncol=1)
+	if (is.null(dim(hsize))) hsize <- matrix(hsize,nrow=nrow(Resources),ncol=1)
 	.Call( "ufun_Attanasio", Resources, hsize, params, PACKAGE = "ArmaUtils" )
 }
 

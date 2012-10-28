@@ -82,10 +82,21 @@ SEXP utilfun( SEXP Res_, SEXP s_, SEXP age_, SEXP par_, SEXP xi_, SEXP own_ )
 
 
 // u(c,h,age) as in Attansio et al. Review of economic dynamics 2012
+// in: 
+// resources matrix
+// hsize vector
+// pars list
+//
+// out:
+// matrix
 SEXP ufun_Attanasio( SEXP Res_, SEXP s_, SEXP par_)
 {
 	mat Res = Rcpp::as<arma::mat>(Res_);
-	int size = Rcpp::as<int>(s_);
+	uvec hsize = Rcpp::as<arma::uvec>(s_);
+	if (hsize.n_elem != Res.n_rows){
+		Rcpp::Rcout << "ERROR: length of house sizes is not equal length of cash" << std::endl;
+		return wrap(0);
+	}
 
 	//par_ = list(gamma,theta,phival,mu,cutoff)
 
@@ -100,19 +111,19 @@ SEXP ufun_Attanasio( SEXP Res_, SEXP s_, SEXP par_)
 	double mgamma = 1-gamma;
 	double imgamma = 1/mgamma;
 
+	vec phivals;
+	phivals << 0 << phival << 1 << endr;
+	vec phivec(hsize.size());
+	for (int i=0; i<hsize.size(); i++) {
+		phivec(i) = phivals( hsize( i ) );
+	}
+
 	//setup output matrix
 	mat ret(Res);
 	int n = ret.n_rows;
 	int m = ret.n_cols;
 	ret.zeros();
 	double diff, g, u, grad, hess;
-	double phi = 0;
-	if (size == 1) {
-		phi = phival;
-	} else if (size == 2) {
-		phi = 1;
-	}
-	double hfac = exp( theta * phi );
 	rowvec tmpvec(m);
 
 	// compute utility from non-durable consumption
@@ -136,10 +147,10 @@ SEXP ufun_Attanasio( SEXP Res_, SEXP s_, SEXP par_)
 		}
 	}
 	// add additive premium if houseing is of right size
-	ret = ret * hfac;
-	if (size != 0){
-		ret = ret + mu * phi;
-	}
+	mat phimat = repmat(phivec,1,m);
+	mat hfac = exp( theta * phimat);
+	ret = ret % hfac;
+	ret = ret + mu * phimat;
 	return wrap(ret);
 }
 

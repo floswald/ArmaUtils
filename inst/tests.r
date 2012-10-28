@@ -1,5 +1,5 @@
 
-
+rm(list=ls(all=T))
 library(rbenchmark)
 
 # test file for ArmaUtils package
@@ -155,6 +155,23 @@ utilfun(Resources=Res,hsize=2,age=4,params=pars,xi=xi,own=TRUE)
 utilfun(Resources=Res,hsize=2,age=4,params=pars,xi=xi,own=FALSE)
 utilfun(Resources=Res,hsize=1:4,age=4,params=pars,xi=xi,own=FALSE)
 utilfun(Resources=Res,hsize=1:5,age=4,params=pars,xi=xi,own=FALSE)	# error message: too many house sizes.
+
+# test utility function 2
+# =======================
+pars <- list(theta=0.115,gamma=1.4,phival=0.9,mu=0.26,cutoff=0.1)
+Res  <- outer(1:4,5:-1)
+
+# on a datatable (i.e. a vector)
+library(data.table)
+dat <- data.table(expand.grid(res = 1:10, size=0:2))
+dat[,util := ufun_Atta(Resources = res, hsize = size, params=pars)]
+
+# on a matrix
+ufun_Atta(Resources=Res,hsize=2,params=pars)	# error
+ufun_Atta(Resources=Res,hsize=c(1,2),params=pars)	# error
+ufun_Atta(Resources=Res,hsize=rep(2L,nrow(Res)),params=pars)	# error
+
+
 
 
 
