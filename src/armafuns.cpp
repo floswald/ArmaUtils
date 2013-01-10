@@ -54,6 +54,10 @@ SEXP armamax2( SEXP X_, SEXP B_ ){
 }
 
 SEXP armakron( SEXP y_, SEXP R_ ){
+	// the following statement enables to pass error messages from cpp to R without a crash.
+	
+	BEGIN_RCPP
+
 	// we get a vector of values and a list of matrices from R
 	vec y = Rcpp::as<vec>(y_)	;
 	Rcpp::List mats(R_);
@@ -68,6 +72,7 @@ SEXP armakron( SEXP y_, SEXP R_ ){
 		// check matrices are square
 		if ( !list.at(i).is_square() ){
 			throw std::logic_error( "armakron: not all matrices are square!" );
+			return R_NilValue;
 		}
 		// fill in dimensions
 		cols(i) = list.at(i).n_cols;
@@ -75,7 +80,7 @@ SEXP armakron( SEXP y_, SEXP R_ ){
 
 	if ( prod(cols) != nall ){
 		throw std::logic_error( "armakron: prod(cols(matrices)) not equal length(y)" );
-		return wrap(NULL);
+		return R_NilValue;
 	}
 
 	// TODO do a sanity check on dimensions of objects!!
@@ -117,5 +122,8 @@ SEXP armakron( SEXP y_, SEXP R_ ){
 		}
 	}
 	return Rcpp::wrap(y1);
+
+	END_RCPP
+		// turn off RCPP error handling
 }
 
