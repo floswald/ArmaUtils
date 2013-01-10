@@ -81,7 +81,7 @@ SEXP utilfun( SEXP Res_, SEXP s_, SEXP age_, SEXP par_, SEXP xi_, SEXP own_ )
 }
 
 
-// u(c,h,age) as in Attansio et al. Review of economic dynamics 2012
+// u(c,h) as in Attansio et al. Review of economic dynamics 2012
 // in: 
 // resources matrix
 // hsize vector
