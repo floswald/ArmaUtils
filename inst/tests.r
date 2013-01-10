@@ -1,5 +1,6 @@
 
 rm(list=ls(all=T))
+library(ArmaUtils)
 library(rbenchmark)
 
 # test file for ArmaUtils package
