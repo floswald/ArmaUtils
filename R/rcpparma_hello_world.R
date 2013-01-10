@@ -170,6 +170,10 @@ armamax <- function(A,b=NULL){
 #' all.equal(as.numeric(pred),vals)	# TRUE
 #' }
 armakron <- function(y,matrices){
+	stopifnot( is.list(matrices) )
+	y <- as.numeric(y)	# make sure y is just a vector
+	stopifnot( all(unlist(lapply(matrices,is.matrix))) )
+	# checking dimensions of matrices (square, product of cols equal to length(y)) in c++
 	.Call( "armakron", y, matrices, PACKAGE = "ArmaUtils" )
 }
 
