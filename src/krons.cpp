@@ -26,6 +26,7 @@ Eigen::VectorXd KronProdSPMat4(
 		Rcpp::Rcout << "a0.cols() * a1.cols() * a2.cols()  * a3.cols()" << std::endl;
 		Rcpp::Rcout <<  a0.cols() * a1.cols() * a2.cols()  * a3.cols() << std::endl;
 		Rcpp::Rcout << "ArmaUtils::krons::KronProdMat4 error: y and matrices not conformable" << std::endl;
+		Rcpp::Rcout << "ArmaUtils::krons::KronProdMat4 error: y and matrices not conformable" << std::endl;
 	}
 
 	//loop rows a0
