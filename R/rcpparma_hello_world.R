@@ -193,12 +193,14 @@ ufun_Atta <- function( Resources, hsize, params ){
 	.Call( "ufun_Attanasio", Resources, hsize, params, PACKAGE = "ArmaUtils" )
 }
 
-# takes y and a list of matrices to compute kronecker of matrics times y. matrices can be sparse or dense (not implemented)
+# takes y and a list of matrices to compute kronecker of matrics times y. matrices can be sparse or dense (only sparse implemented)
 krons <- function( y, matrices ){
 	stopifnot(is.list(matrices))
+	stopifnot(is.numeric(y))
 	n <- length(matrices)
 	alldgC <- lapply(1:n,function(i) class(matrices[[i]])[1]=="dgCMatrix")
 	stopifnot(all(unlist(alldgC)))
+	stopifnot( prod(unlist(lapply(matrices,nrow))) == length(y) )
 	if (n==4) .Call( "kron4", matrices[[1]], matrices[[2]],matrices[[3]],matrices[[4]], y, PACKAGE = "ArmaUtils" )
 }
 

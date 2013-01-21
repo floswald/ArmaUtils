@@ -76,6 +76,17 @@ knitr
 \begin_body
 
 \begin_layout Title
+Utility functions in ArmaUtils
+\end_layout
+
+\begin_layout Standard
+This doc describes the several utlity functions available in the ArmaUtils
+ package.
+ The package implements several tools for dynamic programming in C++ as
+ callable R functions.
+\end_layout
+
+\begin_layout Section
 Cobb douglas utility function 
 \begin_inset Formula $u(c,h,\theta,t)$
 \end_inset
@@ -83,7 +94,17 @@ Cobb douglas utility function
 
 \end_layout
 
-\begin_layout Section
+\begin_layout Subsection
+Calling convention
+\end_layout
+
+\begin_layout Standard
+Call with 
+\family typewriter
+utilfun( Resources, hsize, age, params, xi, own )
+\end_layout
+
+\begin_layout Subsection
 Definition
 \end_layout
 
@@ -159,7 +180,7 @@ u_{h}(c,h,H,\theta,t) & = & \left(n_{t}\right)^{\sigma-1}(1-\alpha)c^{\alpha(1-\
 
 \end_layout
 
-\begin_layout Section
+\begin_layout Subsection
 Implementation
 \end_layout
 
@@ -227,6 +248,371 @@ else, return
 \begin{eqnarray}
 u & = & \xi_{2,t}\left(g(c,h,H)-1\right)\label{eq:true}
 \end{eqnarray}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Utility function as in Attanasio et al REDy (2012)
+\end_layout
+
+\begin_layout Subsection
+Calling
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+ufun_Atta( Resources, hsize, params )
+\end_layout
+
+\begin_layout Subsection
+Definition
+\end_layout
+
+\begin_layout Standard
+House size is discrete 
+\begin_inset Formula $h=\{0,1,2\}$
+\end_inset
+
+ and 
+\begin_inset Formula $h=0$
+\end_inset
+
+ is renting.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+u(c,h) & = & \frac{c^{1-\gamma}}{1-\gamma}\exp\left(\theta\phi(h)\right)+\mu\phi(h)\\
+\phi(h) & = & \begin{cases}
+0 & \text{if }h=0\\
+\in(0,1) & \text{if }h=1\\
+1 & \text{if }h=2
+\end{cases}
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Attanasio with labor supply
+\end_layout
+
+\begin_layout Subsection
+Definition
+\end_layout
+
+\begin_layout Standard
+Just add labor supply to the above, i.e.
+ define leisure 
+\begin_inset Formula $l\in[0,1]$
+\end_inset
+
+ in 
+\begin_inset Formula 
+\begin{eqnarray*}
+u(c,l,h) & = & \frac{\left(c^{\alpha}l^{1-\alpha}\right)^{1-\gamma}}{1-\gamma}\exp\left(\theta\phi(h)\right)+\mu\phi(h)\\
+\phi(h) & = & \begin{cases}
+0 & \text{if }h=0\\
+\in(0,1) & \text{if }h=1\\
+1 & \text{if }h=2
+\end{cases}
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+optimal policies, period value function, partial derivatives of value function
+\end_layout
+
+\begin_layout Standard
+Define resources after savings were decided as 
+\begin_inset Formula $R=a-\frac{1}{1+r}a'+w$
+\end_inset
+
+.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+look at the accompanying document 
+\begin_inset Quotes eld
+\end_inset
+
+maximization
+\begin_inset Quotes erd
+\end_inset
+
+ in the same folder
+\end_layout
+
+\end_inset
+
+ If 
+\begin_inset Formula $(1-\alpha)\frac{R}{w}\leq1$
+\end_inset
+
+, then the optimal choice is to supply labor 
+\begin_inset Formula $n\geq0$
+\end_inset
+
+, and 
+\begin_inset Formula 
+\begin{eqnarray*}
+c^{*} & = & \alpha R\\
+1-n^{*}=l^{*} & = & (1-\alpha)\frac{R}{w}\\
+v(R,w)\equiv u(c^{*},l^{*}) & = & \frac{\left[\left(\alpha R\right)^{\alpha}\left((1-\alpha)\frac{R}{w}\right)^{1-\alpha}\right]^{1-\gamma}}{1-\gamma}\\
+ & = & \frac{R^{1-\gamma}}{1-\gamma}\frac{\alpha^{\alpha(1-\gamma)}(1-\alpha)^{(1-\alpha)(1-\gamma)}}{w^{(1-\gamma)(1-\alpha)}}
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+comparative statics of optimal labor supply 
+\end_layout
+
+\begin_layout Subsubsection
+with respect to wage
+\end_layout
+
+\begin_layout Standard
+remember available resources are 
+\begin_inset Formula $R=a-\frac{1}{1+r}a'+w$
+\end_inset
+
+.
+ Therefore 
+\begin_inset Formula 
+\begin{eqnarray*}
+\frac{\partial l^{*}}{\partial w} & = & \frac{\partial\frac{(1-\alpha)\left[a-\frac{1}{1+r}a'+w\right]}{w}}{\partial w}\\
+ & = & \frac{\partial(1-\alpha)\left[a-\frac{1}{1+r}a'\right]w^{-1}+1}{\partial w}\\
+ & = & -\frac{(1-\alpha)}{w^{2}}\left[a-\frac{1}{1+r}a'\right]
+\end{eqnarray*}
+
+\end_inset
+
+which is a positive effect if 
+\begin_inset Formula $a<\frac{1}{1+r}a'$
+\end_inset
+
+, and it's negative otherwise.
+ The former case means the agent is increasing her asset position -- ie
+ she is saving.
+ This is possible if wage is high enough.
+ Let 
+\begin_inset Formula $z=a-\frac{1}{1+r}a'<0$
+\end_inset
+
+, then if 
+\begin_inset Formula $w>-z\Rightarrow R>0$
+\end_inset
+
+.
+ There is a negative effect if the agent is reducing the net asset position,
+ 
+\begin_inset Formula $z=a-\frac{1}{1+r}a'<0$
+\end_inset
+
+.
+ So again: leisure is increasing in wage if savings go up, leisure is decreasing
+ in wage if savings go down.
+\end_layout
+
+\begin_layout Subsubsection
+with respect to current assets 
+\begin_inset Formula $a$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+\frac{\partial l^{*}}{\partial a} & = & \frac{\partial(1-\alpha)\left[a-\frac{1}{1+r}a'\right]w^{-1}+1}{\partial a}\\
+ & = & (1-\alpha)w^{-1}\\
+ & > & 0
+\end{eqnarray*}
+
+\end_inset
+
+in particular, in the case of bankruptcy, i.e.
+ if labor supply without bankruptcy is 
+\begin_inset Formula $l_{1}=\frac{(1-\alpha)\left[a_{1}-\frac{1}{1+r}a'+w\right]}{w}$
+\end_inset
+
+ for 
+\begin_inset Formula $a_{1}<0$
+\end_inset
+
+, then 
+\begin_inset Formula $l_{2}=\frac{(1-\alpha)\left[0-\frac{1}{1+r}a'+w\right]}{w}>l_{1}$
+\end_inset
+
+.
+ So leisure is increasing in current assets, all else equal.
+\end_layout
+
+\begin_layout Subsubsection
+Positive labor supply and negative consumption approximation
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+v(R,w) & = & \frac{R^{1-\gamma}}{1-\gamma}\frac{\alpha^{\alpha(1-\gamma)}(1-\alpha)^{(1-\alpha)(1-\gamma)}}{w^{(1-\gamma)(1-\alpha)}}\\
+c^{*} & = & \alpha R\\
+1-n^{*}=l^{*} & = & (1-\alpha)\frac{R}{w}\\
+\frac{dv(R,w)}{dR} & = & R^{-\gamma}\frac{\alpha^{\alpha(1-\gamma)}(1-\alpha)^{(1-\alpha)(1-\gamma)}}{w^{(1-\gamma)(1-\alpha)}}\\
+ & = & \frac{v(R,w)\cdot(1-\gamma)}{R}\\
+\frac{d^{2}v(R,w)}{dR^{2}} & = & -\gamma R^{-\gamma-1}\frac{\alpha^{\alpha(1-\gamma)}(1-\alpha)^{(1-\alpha)(1-\gamma)}}{w^{(1-\gamma)(1-\alpha)}}\\
+ & = & -\frac{\gamma}{R}\frac{dv(R,w)}{dR}\\
+ & = & -\gamma\frac{v(R,w)\cdot(1-\gamma)}{R^{2}}
+\end{eqnarray*}
+
+\end_inset
+
+If 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+
+\begin_inset Formula $R=y+a-\frac{1}{1+r}a'+w<\varepsilon$
+\end_inset
+
+, i.e.
+ resources and therefore consumption are negative, we apply a second order
+ taylor approximation about 
+\begin_inset Formula $\varepsilon$
+\end_inset
+
+ and return value 
+\begin_inset Formula $\tilde{u}$
+\end_inset
+
+:
+\begin_inset Formula 
+\begin{eqnarray*}
+\tilde{u} & = & v(\varepsilon,w)+\frac{dv(\varepsilon,w)}{dR}(R-\varepsilon)+\frac{1}{2}\frac{d^{2}v(\varepsilon,w)}{dR^{2}}(R-\varepsilon)^{2}\\
+ & = & v(\varepsilon,w)+\frac{v(\varepsilon,w)\cdot(1-\gamma)}{R}(R-\varepsilon)-\frac{\gamma}{2}\frac{v(\varepsilon,w)\cdot(1-\gamma)}{R^{2}}(R-\varepsilon)^{2}
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+No labor supplied
+\end_layout
+
+\begin_layout Standard
+If this is not true, i.e.
+ as soon as 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+
+\begin_inset Formula $(1-\alpha)\frac{R}{w}>1$
+\end_inset
+
+, we have 
+\begin_inset Formula $l^{*}=1$
+\end_inset
+
+ and
+\family default
+\series default
+\shape default
+\size default
+\emph default
+\bar default
+\strikeout default
+\uuline default
+\uwave default
+\noun default
+\color inherit
+
+\begin_inset Formula 
+\begin{eqnarray*}
+c^{*} & = & R\\
+l^{*} & = & 1
+\end{eqnarray*}
+
+\end_inset
+
+In this case, 
+\begin_inset Formula 
+\begin{eqnarray*}
+u & = & \frac{\left[\left(R\right)^{\alpha}\left(1\right)^{1-\alpha}\right]^{1-\gamma}}{1-\gamma}\\
+ & = & \frac{\left(R\right)^{\alpha(1-\gamma)}}{1-\gamma}\\
+\frac{du}{dR} & = & \alpha R^{(1-\gamma)\alpha-1}\\
+ & = & \alpha\frac{(1-\gamma)u}{R}\\
+\frac{d^{2}u}{dR^{2}} & = & \left((1-\gamma)\alpha-1\right)\alpha R^{(1-\gamma)\alpha-2}\\
+ & = & \frac{\left((1-\gamma)\alpha-1\right)}{R}\frac{du}{dR}
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+quadratic approximation of negative resources in no labor case
+\end_layout
+
+\begin_layout Standard
+If 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+
+\begin_inset Formula $R=y+a-\frac{1}{1+r}a'+w<\varepsilon$
+\end_inset
+
+ we approximate the value.
+\begin_inset Formula 
+\begin{eqnarray*}
+\tilde{u} & = & \frac{\varepsilon^{1-\gamma}}{1-\gamma}\frac{\alpha^{\alpha(1-\gamma)}(1-\alpha)^{(1-\alpha)(1-\gamma)}}{w^{(1-\gamma)(1-\alpha)}}\\
+ & + & \frac{\tilde{u}(\varepsilon,w)(1-\gamma)}{R}(R-\varepsilon)\\
+ & - & \frac{1}{2}\frac{\gamma}{\varepsilon}\frac{d\tilde{u}(\varepsilon,w)}{d\varepsilon}(R-\varepsilon)^{2}
+\end{eqnarray*}
 
 \end_inset
 
