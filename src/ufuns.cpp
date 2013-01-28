@@ -91,6 +91,7 @@ SEXP utilfun( SEXP Res_, SEXP s_, SEXP age_, SEXP par_, SEXP xi_, SEXP own_ )
 // matrix
 SEXP ufun_Attanasio( SEXP Res_, SEXP s_, SEXP par_)
 {
+
 	mat Res = Rcpp::as<arma::mat>(Res_);
 	uvec hsize = Rcpp::as<arma::uvec>(s_);
 	if (hsize.n_elem != Res.n_rows){
