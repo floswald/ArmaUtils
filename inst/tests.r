@@ -168,9 +168,18 @@ dat <- data.table(expand.grid(res = 1:10, size=0:2))
 dat[,util := ufun_Atta(Resources = res, hsize = size, params=pars)]
 
 # on a matrix
-ufun_Atta(Resources=Res,hsize=2,params=pars)	# error
-ufun_Atta(Resources=Res,hsize=c(1,2),params=pars)	# error
-ufun_Atta(Resources=Res,hsize=rep(2L,nrow(Res)),params=pars)	# error
+ufun_Atta(Resources=Res,hsize=2,params=pars)	
+ufun_Atta(Resources=Res,hsize=c(1,2),params=pars)
+ufun_Atta(Resources=Res,hsize=rep(2L,nrow(Res)),params=pars)
+
+# test dependence on parameters
+# mu
+muvals <- seq(from=0.1,to=2,length=30)
+uvals <- data.frame(mu = muvals)
+uvals$utility <- 0
+for (i in 1:30) uvals[i,]$utility <- ufun_Atta(Resources=1,hsize=1,params=list(theta=0.115,gamma=1.4,phival=0.9,mu=muvals[i],cutoff=0.1))
+plot(uvals$mu,uvals$utility,type="l")
+
 
 
 
