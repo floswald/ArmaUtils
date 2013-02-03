@@ -185,7 +185,6 @@ plot(uvals$mu,uvals$utility,type="l")
 
 
 
-
 # test kron
 # =========
 

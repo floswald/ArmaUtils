@@ -4,7 +4,7 @@
 \alias{utilfun}
 \title{Calculates Utility functions}
 
-\description{Calculates CRRA utility of u(Resources, hsize, age, params, xi, own ) at each entry of Resources.}
+\description{Calculates CRRA utility of u(Resources, hsize, age, params, xi, own ) at each entry of Resources. Not used in Li, Meghir, Oswald.}
 
 \usage{utilfun(Resources, hsize, age, params, xi, own )}
 
