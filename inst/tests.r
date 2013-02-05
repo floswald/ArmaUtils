@@ -214,3 +214,27 @@ all.equal(as.numeric(r.result),c.result)
 
 
 
+# test ufun_labour_h
+# ================
+
+pars <- list(alpha=0.3,gamma=1.4,cutoff=0.1,mu=0.9,theta=0.3,phival=0.8)
+Res  <- outer(1:4,5:-1)
+w <- runif(4,min=1,max=4)
+s <- c(0,0,1,2)
+cc <- ufun_Atta_L(Res,w,s,pars)
+source("rtests.r")
+rr <- ufun_labouR_h(Res,w,s,pars) 	# same function in R
+all.equal(cc$utility,rr$utility)	# TRUE
+all.equal(cc$cons,rr$cons)	# TRUE
+all.equal(cc$labo,rr$labo)	# TRUE
+
+cc <- ufun_Atta_L(Res,w,0.2,pars)	# error
+cc <- ufun_Atta_L(Res,w,0,pars)	
+source("~/git/ArmaUtils/inst/rtests.r")
+rr <- ufun_labouR_h(Res,w,0,pars) 	# same function in R
+all.equal(cc$utility,rr$utility)	# TRUE
+all.equal(cc$cons,rr$cons)	# TRUE
+all.equal(cc$labo,rr$labo)	# TRUE
+
+
+

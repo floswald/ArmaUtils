@@ -178,9 +178,6 @@ armakron <- function(y,matrices){
 }
 
 
-
-
-
 utilfun <- function( Resources, hsize, age, params, xi, own ){
 	if (is.null(dim(Resources))) Resources <- matrix(Resources,nrow=length(Resources),ncol=1)
 	.Call( "utilfun", Resources, hsize, age, params, xi, own, PACKAGE = "ArmaUtils" )
@@ -190,9 +187,21 @@ utilfun <- function( Resources, hsize, age, params, xi, own ){
 ufun_Atta <- function( Resources, hsize, params ){
 	if (is.null(dim(Resources))) Resources <- matrix(Resources,nrow=length(Resources),ncol=1)
 	if (is.null(dim(hsize))) hsize <- matrix(hsize,nrow=nrow(Resources),ncol=1)
+	if (!all(hsize %in% 0:2)) stop("hsize needs to be one of 0,1,2")
 	stopifnot(is.list(params))
 	stopifnot(!any(unlist(lapply(params,is.null))))
 	.Call( "ufun_Attanasio", Resources, hsize, params, PACKAGE = "ArmaUtils" )
+}
+
+
+ufun_Atta_L <- function( Resources, wage, hsize, params ){
+	if (is.null(dim(Resources))) Resources <- matrix(Resources,nrow=length(Resources),ncol=1)
+	if (is.null(dim(hsize))) hsize <- matrix(hsize,nrow=nrow(Resources),ncol=1)
+	if (is.null(dim(wage))) wage <- matrix(wage,nrow=nrow(Resources),ncol=1)
+	if (!all(hsize %in% 0:2)) stop("hsize needs to be one of 0,1,2")
+	stopifnot(is.list(params))
+	stopifnot(!any(unlist(lapply(params,is.null))))
+	.Call( "ufun_Attanasio_L", Resources, wage, hsize, params, PACKAGE = "ArmaUtils" )
 }
 
 # takes y and a list of matrices to compute kronecker of matrics times y. matrices can be sparse or dense (only sparse implemented)

@@ -8,10 +8,12 @@
 V(S) = max_x u(S,x) + b * V(S'|S,x) where S stands for the state space, x for control variables, V() and u() are real valued functions. The package is useful if S is large. 
 It has the following functionality: \cr
 \tabular{ll}{
-compute u(): \tab \code{\link{utilfun}} efficiently computes different forms of u(S,x) at each point of kronecker(S,x)\cr
-max u(S,x) + b * V(S'|S,x): \tab \code{\link{armamax}} finds the pointwise maximum at each S, optionally observing a restriction on the search space \cr
-approximate V(S'): \tab \code{\link{armakron}} computes approximating B-spline coefficients on high-dimensional kronecker products of univariate basis functions \cr
-evaluate approximations of V(S'): \tab \code{\link{krons}} evaluate high-dimensional kronecker products to obtain an approximation to V(S')\cr
+compute u(c,h): \tab \code{\link{utilfun}} computes u(c,h) \cr
+compute u(c,h): \tab \code{\link{ufun_Atta}} computes u(c,h) after Wakefield et al. \cr
+compute u(c,l,h): \tab \code{\link{ufun_Atta_L}} computes u(c,l,h) \cr
+max u(S,x) + b * V(S'|S,x): \tab \code{\link{armamax}} pointwise max \cr
+approximate V(S'): \tab \code{\link{armakron}} obtain B-spline coefficients \cr
+evaluate approximations of V(S'): \tab \code{\link{krons}} evaluate B-spline coeffs\cr
 }}
 
 \details{
@@ -27,7 +29,8 @@ License: \tab What license is it under?\cr
 \author{florian.oswald@gmail.com}
 
 \references{C. De Boor. Efficient computer manipulation of tensor products. ACM Transactions on Mathematical Software (TOMS), 5(2):173-182, 1979\cr
-M. Miranda and P. Fackler. Applied computational economics and finance. MIT Press, 2002}
+M. Miranda and P. Fackler. Applied computational economics and finance. MIT Press, 2002\cr
+Orazio P. Attanasio, Renata Bottazzi, Hamish W. Low, Lars Nesheim, and Matthew Wakefield. Modelling the demand for housing over the life cycle. Review of Economic Dynamics, 15(1):1 – 18, 2012.}
 \keyword{ package }
 
 \examples{

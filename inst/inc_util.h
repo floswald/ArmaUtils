@@ -1,5 +1,6 @@
-#ifndef _RcppUtils_UFUNS_H
-#define _RcppUtils_UFUNS_H
+
+#ifndef _ArmaUtils_INC_UTIL_H
+#define _ArmaUtils_INC_UTIL_H
 
 #include <RcppArmadillo.h>
 
@@ -24,11 +25,5 @@ double approxw(double cons, double x,double alphaxi1,double malphaxi2, double mg
 }
 
 
-
-
-// Rcpp Exporting of functions
-RcppExport SEXP utilfun(  SEXP Res_, SEXP s_, SEXP age_, SEXP par_, SEXP xi_, SEXP own_ ) ; 
-RcppExport SEXP ufun_Attanasio( SEXP Res_, SEXP s_, SEXP par_) ; 
-RcppExport SEXP ufun_Attanasio_L( SEXP Res_, SEXP w_, SEXP s_, SEXP par_) ; 
 
 #endif

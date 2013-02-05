@@ -222,7 +222,8 @@ Res  <- outer(1:4,5:-1)
 s <- array(c(1,2,0,0),dim=c(4,1))
 ufun_Atta(Res,s,pars)
 
-# ufun_Atta with labor supply
+# ufun_labour 
+# ===========
 
 cpp.code <- '
 #include <iostream>
@@ -230,81 +231,347 @@ using namespace std;
 using namespace arma;
 
 mat Res = Rcpp::as<arma::mat>(Res_);
-uvec hsize = Rcpp::as<arma::uvec>(s_);
+int n = Res.n_rows;
+int m = Res.n_cols;
 vec wage = Rcpp::as<arma::vec>(w_);
-if (hsize.n_elem != Res.n_rows){
-	Rcpp::Rcout << "ERROR: length of house sizes is not equal length of cash" << std::endl;
-	return wrap(0);
+
+if ( wage.n_elem != n){
+	Rcpp::Rcout << "error. wage and Res are not conformable" << endl;
+	return R_NilValue;
 }
 
-//par_ = list(gamma,theta,phival,mu,alpha,cutoff)
+uvec neg = wage <= 0;
+if ( sum(neg) > 0 ){
+	Rcpp::Rcout << "error. wage must be positive" << endl;
+	return R_NilValue;
+}
+
+//par_ = list(alpha,xi1,xi2,gamma,cutoff)
 
 // now get parameters out of lists par 
 Rcpp::List par( par_ ) ;
 
 double gamma = Rcpp::as<double>(par["gamma"]);
-double theta = Rcpp::as<double>(par["theta"]);
 double cutoff = Rcpp::as<double>(par["cutoff"]);
+double alpha = Rcpp::as<double>(par["alpha"]);
+	double xi1 = alpha * (1-gamma);
+	double xi2 = (1-alpha)*(1-gamma);
+	double malpha = 1-alpha;
+	double mgamma = 1-gamma;
+	double imgamma = 1/mgamma;
+	double alphaxi1 = pow(alpha, xi1);
+	double malphaxi2 = pow(malpha, xi2);
+
+Rcpp::Rcout<< " Res " << Res << endl;
+Rcpp::Rcout<< " wage " << wage << endl;
+Rcpp::Rcout<< " alpha " << alpha << endl;
+Rcpp::Rcout<< " malpha " << malpha << endl;
+Rcpp::Rcout<< " alphaxi1 " << alphaxi1 << endl;
+Rcpp::Rcout<< " malphaxi2 " << malphaxi2 << endl;
+Rcpp::Rcout<< " xi1 " << xi1<< endl;
+Rcpp::Rcout<< " xi2 " << xi2<< endl;
+Rcpp::Rcout<< " gamma " << gamma << endl;
+
+// repmat wage into wagemat
+mat wagemat = repmat(wage,1,m);
+mat idmat = malpha * (Res / wagemat);
+
+Rcpp::Rcout<< " wagemat" << wagemat<< endl;
+Rcpp::Rcout<< " idmat" << idmat<< endl;
+
+// return matrices
+mat retu = zeros<mat>(Res.n_rows,Res.n_cols);
+mat retc = retu;
+mat retn = retu;
+
+//compute utilty. flow depends on
+//a) whether mat work ==1 or ==0 and
+//b) whether cons < 0
+
+mat consmat = Res - wagemat; 	// resources in case of no work
+double g;
+rowvec tmpvec(m);
+
+for( int i=0; i<n; i++){
+	// in each row. check first work index
+	uvec k = find(Res.row(i)*malpha < wagemat.row(i),1);
+	cout << "k = " << k << endl;
+	if( k.n_elem == 0 ){
+		cout << "computing no work." << endl;
+		//no work in this row
+		if( consmat(i,m-1) < cutoff ){	// check if the last entry in row i is below cutoff. if last is not, none is. Res = c - savings, savings increase to the right.
+			for (int j=0; j<m; j++){	// iterate over columns
+				if( consmat(i,j) < cutoff ){
+					// entry j is below cutoff
+					retu(i,j) = approx(consmat(i,j),cutoff,xi1,alpha,imgamma);
+					retc(i,j) = consmat(i,j);
+					retn(i,j) = 0;
+				} else {
+					// entry j is not
+					g = pow( consmat(i,j), xi1);
+					retu(i,j) = imgamma * g;
+					retc(i,j) = consmat(i,j);
+				}
+			}
+		} else {
+			tmpvec = pow(consmat.row(i),xi1);
+			retu.row(i) = imgamma * tmpvec;
+			retc.row(i) = consmat.row(i);
+		}
+	} else {
+		// work starting at index k
+		int ki = conv_to<int>::from(k);
+		if( consmat(i,m-1) < cutoff ){	// check if the last entry in row i is below cutoff. if last is not, none is. Res = c - savings, savings increase to the right.
+			for (int j=0; j<ki; j++){	// iterate over non work-columns
+				// NO WORK
+				if( consmat(i,j) < cutoff ){
+					// entry j is below cutoff
+					retu(i,j) = approx(consmat(i,j),cutoff,xi1,alpha,imgamma);
+					retc(i,j) = consmat(i,j);
+				} else {
+					// entry j is not
+					g = pow( consmat(i,j), xi1);
+					retu(i,j) = imgamma * g;
+					retc(i,j) = consmat(i,j);
+				}
+			}
+			for (int j=ki; j<m; j++){  // iterate over work columns
+				// WORK
+				if( Res(i,j) < cutoff ){
+					// entry j is below cutoff
+					retu(i,j) = approxw(Res(i,j),cutoff,alphaxi1,malphaxi2, mgamma,imgamma, wagemat(i,j), xi2, gamma);
+					retc(i,j) = Res(i,j) * alpha;
+					retn(i,j) = 1- idmat(i,j);
+				} else {
+					// entry j is not
+					g = alphaxi1 * malphaxi2 * pow( Res(i,j), mgamma) / pow( wagemat(i,j), xi2) ;
+					retu(i,j) = imgamma * g;
+					retc(i,j) = Res(i,j) * alpha;
+					retn(i,j) = 1- idmat(i,j);
+				}
+			}
+		} else {
+			// no negative consumption in either work/non-work world in this row
+			rowvec noworku = pow(consmat.row(i).cols(0,ki-1),xi1);
+			rowvec worku = alphaxi1 * malphaxi2 * pow(Res.row(i).cols(ki,m),mgamma) / pow( wagemat.row(i).cols(ki,m), xi2);
+			rowvec noworkc = consmat.row(i).cols(0,ki-1);
+			rowvec workc = Res.row(i).cols(ki,m) * alpha;
+			rowvec workn = 1 - idmat.row(i).cols(ki,m);
+			retu.row(i) = join_cols(noworku,worku);
+			retc.row(i) = join_cols(noworkc,workc);
+			retn.row(i).cols(ki,m) = workn;
+		}
+	}
+}
+Rcpp::List rlist = Rcpp::List::create( _["utility"] = retu, _["consumption"] = retc , _["labour"] = retn);
+return rlist;
+'
+
+ufun_labour <- cxxfunction(signature(Res_="matrix",w_="numeric",par_="list"),body=cpp.code,plugin="RcppArmadillo",includes="#include </Users/florianoswald/git/ArmaUtils/inst/inc_util.h>",verbose=TRUE)
+pars <- list(alpha=0.3,gamma=1.4,cutoff=0.1)
+Res  <- outer(1:4,5:-1)
+w <- runif(4,min=1,max=4)
+cc <- ufun_labour(Res,w,pars)
+source("rtests.r")
+rr <- ufun_labouR(Res,w,pars) 	# same function in R
+all.equal(cc$utility,rr$utility)	# TRUE
+all.equal(cc$cons,rr$cons)	# TRUE
+all.equal(cc$labo,rr$labo)	# TRUE
+
+
+# ufun_labour_h
+# ===========
+
+cpp.code <- '
+#include <iostream>
+using namespace std;
+using namespace arma;
+
+// BEGIN_RCPP inline adds that
+
+mat Res = Rcpp::as<arma::mat>(Res_);
+int n = Res.n_rows;
+int m = Res.n_cols;
+vec wage = Rcpp::as<arma::vec>(w_);
+
+uvec hsize = Rcpp::as<arma::uvec>(s_);
+int nh = hsize.n_elem;
+if (hsize.n_elem != Res.n_rows){
+	throw std::logic_error( "ufun_Attanasio: hsize and Res are not equal rows!" );
+	return R_NilValue;
+}
+
+if ( wage.n_elem != n){
+	throw std::logic_error("error. wage and Res are not conformable");
+	return R_NilValue;
+}
+	if ( hsize.n_elem != Res.n_rows){
+	throw std::logic_error("error. hsize and Res are not conformable");
+	return R_NilValue;
+	}
+
+uvec neg = wage <= 0;
+if ( sum(neg) > 0 ){
+	throw std::logic_error("error. wage must be positive");
+	return R_NilValue;
+}
+
+//par_ = list(alpha,xi1,xi2,gamma,cutoff)
+
+// now get parameters out of lists par 
+Rcpp::List par( par_ ) ;
+
+double theta = Rcpp::as<double>(par["theta"]);
 double phival = Rcpp::as<double>(par["phival"]);
 double mu = Rcpp::as<double>(par["mu"]);
-double mu = Rcpp::as<double>(par["alpha"]);
+double gamma = Rcpp::as<double>(par["gamma"]);
+double cutoff = Rcpp::as<double>(par["cutoff"]);
+double alpha = Rcpp::as<double>(par["alpha"]);
+double xi1 = alpha * (1-gamma);
+double xi2 = (1-alpha)*(1-gamma);
+double malpha = 1-alpha;
 double mgamma = 1-gamma;
 double imgamma = 1/mgamma;
+double alphaxi1 = pow(alpha, xi1);
+double malphaxi2 = pow(malpha, xi2);
+
+Rcpp::Rcout<< " Res " << Res << endl;
+Rcpp::Rcout<< " wage " << wage << endl;
+Rcpp::Rcout<< " alpha " << alpha << endl;
+Rcpp::Rcout<< " malpha " << malpha << endl;
+Rcpp::Rcout<< " alphaxi1 " << alphaxi1 << endl;
+Rcpp::Rcout<< " malphaxi2 " << malphaxi2 << endl;
+Rcpp::Rcout<< " xi1 " << xi1<< endl;
+Rcpp::Rcout<< " xi2 " << xi2<< endl;
+Rcpp::Rcout<< " gamma " << gamma << endl;
 
 vec phivals;
 phivals << 0 << phival << 1 << endr;
 vec phivec(hsize.size());
-for (int i=0; i<hsize.size(); i++) {
+for (int i=0; i<nh; i++) {
 	phivec(i) = phivals( hsize( i ) );
 }
 
-Rcpp::Rcout<< " Res " << Res << endl;
-Rcpp::Rcout<< " hsize" << hsize << endl;
-Rcpp::Rcout<< " wage" << wage << endl;
-Rcpp::Rcout<< " phivec " << phivec << endl;
 
+// repmat wage into wagemat
+mat wagemat = repmat(wage,1,Res.n_cols);
+mat idmat = malpha * Res / wagemat;
 
-//setup output matrix
-mat ret(Res);
-int n = ret.n_rows;
-int m = ret.n_cols;
-ret.zeros();
-double diff, g, u, grad, hess;
+cout<< " wagemat" << wagemat<< endl;
+cout<< " idmat" << idmat<< endl;
+
+//labour indicator
+//	umat work = find(idmat < 1);
+//	cout<< " work" << work << endl;
+
+//return matrices
+mat retu = zeros<mat>(Res.n_rows,Res.n_cols);
+mat retc = retu;
+mat retn = retu;
+
+//compute utilty. flow depends on
+//a) whether mat work ==1 or ==0 and
+//b) whether cons < 0
+
+mat consmat = Res - wagemat; 	// resources in case of no work
+cout << "consmat" << consmat << endl;
+double g;
 rowvec tmpvec(m);
 
-// compute utility from non-durable consumption
-	for (int i=0; i<n; i++){
-		if( Res(i,m-1) < cutoff ){	// check if the last entry in row i is below cutoff. if last is not, none is. Res = c - savings, savings increase to the right.
-			for (int j=0; j<m; j++){
-				if( Res(i,j) < cutoff ){ // compute approximated utility at all entries of row i below cutoff
-					g        = pow(cutoff,mgamma);	 
-					grad     = g / cutoff;   
-					hess     = -gamma * grad / cutoff;	
-					diff     = Res(i,j) - cutoff;
-					ret(i,j) = imgamma*g + (grad * diff) + 0.5 * hess * pow(diff,2);
+for( int i=0; i<n; i++){
+	// in each row. check first work index
+	uvec k = find(Res.row(i)*malpha < wagemat.row(i),1);
+	cout << "k = " << k << endl;
+	if( k.n_elem == 0 ){
+		cout << "computing no work." << endl;
+		//no work in this row
+		if( consmat(i,m-1) < cutoff ){	// check if the last entry in row i is below cutoff. if last is not, none is. Res = c - savings, savings increase to the right.
+			for (int j=0; j<m; j++){	// iterate over columns
+				if( consmat(i,j) < cutoff ){
+					// entry j is below cutoff
+					retu(i,j) = approx(consmat(i,j),cutoff,xi1,alpha,imgamma);
+					retc(i,j) = consmat(i,j);
+					retn(i,j) = 0;
 				} else {
-					g = pow(Res(i,j),mgamma);	  
-					ret(i,j) = imgamma * g;	    
+					// entry j is not
+					g = pow( consmat(i,j), xi1);
+					retu(i,j) = imgamma * g;
+					retc(i,j) = consmat(i,j);
 				}
 			}
 		} else {
-			tmpvec = pow(Res.row(i),mgamma);   // equation (6)
-			ret.row(i) = imgamma * tmpvec;    // equation (11)
+			tmpvec = pow(consmat.row(i),xi1);
+			retu.row(i) = imgamma * tmpvec;
+			retc.row(i) = consmat.row(i);
+		}
+	} else {
+		// work starting at index k
+		int ki = conv_to<int>::from(k);
+		if( consmat(i,m-1) < cutoff ){	// check if the last entry in row i is below cutoff. if last is not, none is. Res = c - savings, savings increase to the right.
+			for (int j=0; j<ki; j++){	// iterate over non work-columns
+				// NO WORK
+				if( consmat(i,j) < cutoff ){
+					// entry j is below cutoff
+					retu(i,j) = approx(consmat(i,j),cutoff,xi1,alpha,imgamma);
+					retc(i,j) = consmat(i,j);
+				} else {
+					// entry j is not
+					g = pow( consmat(i,j), xi1);
+					retu(i,j) = imgamma * g;
+					retc(i,j) = consmat(i,j);
+				}
+			}
+			for (int j=ki; j<m; j++){  // iterate over work columns
+				// WORK
+				if( Res(i,j) < cutoff ){
+					// entry j is below cutoff
+					retu(i,j) = approxw(Res(i,j),cutoff,alphaxi1,malphaxi2, mgamma,imgamma, wagemat(i,j), xi2, gamma);
+					retc(i,j) = Res(i,j) * alpha;   // that is not the correct approx.
+					retn(i,j) = 1- idmat(i,j);      // neither is this. but those neg cons values are not useful anyway.
+				} else {
+					// entry j is not
+					g = alphaxi1 * malphaxi2 * pow( Res(i,j), mgamma) / pow( wagemat(i,j), xi2) ;
+					retu(i,j) = imgamma * g;
+					retc(i,j) = Res(i,j) * alpha;
+					retn(i,j) = 1- idmat(i,j);
+				}
+			}
+		} else {
+			// no negative consumption in either work/non-work world in this row
+			rowvec noworku = pow(consmat.row(i).cols(0,ki-1),xi1);
+			rowvec worku = alphaxi1 * malphaxi2 * pow(Res.row(i).cols(ki,m),mgamma) / pow( wagemat.row(i).cols(ki,m), xi2);
+			rowvec noworkc = consmat.row(i).cols(0,ki-1);
+			rowvec workc = Res.row(i).cols(ki,m) * alpha;
+			rowvec workn = 1 - idmat.row(i).cols(ki,m);
+			retu.row(i) = join_cols(noworku,worku);
+			retc.row(i) = join_cols(noworkc,workc);
+			retn.row(i).cols(ki,m) = workn;
 		}
 	}
-	// add additive premium if houseing is of right size
-	mat phimat = repmat(phivec,1,m);
-	mat hfac = exp( theta * phimat);
-	ret = ret % hfac;
-	ret = ret + mu * phimat;
-	return wrap(ret);
+}
+// add additive premium if houseing is of right size
+mat phimat = repmat(phivec,1,m);
+mat hfac = exp( theta * phimat);
+retu = retu % hfac;
+retu = retu + mu * phimat;
+
+Rcpp::Rcout << "utility " << retu << endl;
+Rcpp::Rcout << "consumption " << retc << endl;
+Rcpp::Rcout << "labour " << retn << endl;
+Rcpp::List rlist = Rcpp::List::create( _["utility"] = retu, _["consumption"] = retc , _["labour"] = retn);
+return rlist;
 '
 
-ufun_Atta <- cxxfunction(signature(Res_="matrix",s_="integer",par_="list"),body=cpp.code,plugin="RcppArmadillo")
-pars <- list(theta=0.115,gamma=1.4,phival=0.9,mu=0.26,cutoff=0.1)
+ufun_labour_h <- cxxfunction(signature(Res_="matrix",w_="numeric",s_="numeric",par_="list"),body=cpp.code,plugin="RcppArmadillo",includes="#include </Users/florianoswald/git/ArmaUtils/inst/inc_util.h>")
+pars <- list(alpha=0.3,gamma=1.4,cutoff=0.1,mu=0.9,theta=0.3,phival=0.8)
 Res  <- outer(1:4,5:-1)
-s <- array(c(1,2,0,0),dim=c(4,1))
-ufun_Atta(Res,s,pars)
+w <- runif(4,min=1,max=4)
+s <- c(0,0,1,2)
+cc <- ufun_labour_h(Res,w,s,pars)
+rr <- ufun_labouR_h(Res,w,s,pars) 	# same function in R
+all.equal(cc$utility,rr$utility)	# TRUE
+all.equal(cc$cons,rr$cons)	# TRUE
+all.equal(cc$labo,rr$labo)	# TRUE
 
 
 # KronProdSPMat4: c++ kronecker product for 4 dimensions. geared towards spline basis matrices.
