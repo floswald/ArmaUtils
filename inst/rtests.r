@@ -39,8 +39,7 @@ ufun_labouR <- function(e,w,params){
 					grad      <- gwx[i,j] / params$cutoff
 					hess      <- (-params$gamma/params$cutoff) * grad
 					util[i,j] <- gwx[i,j] / (1-params$gamma) + grad*distw[i,j] + 0.5 * hess * distw[i,j]^2
-					cons[i,j] <- params$alpha * e[i,j]
-					labo[i,j] <- 1 - (1-params$alpha) * e[i,j]/w[i,j]
+					cons[i,j] <- e[i,j]
 				}
 			} else {
 				# don't work. 
@@ -51,7 +50,7 @@ ufun_labouR <- function(e,w,params){
 				} else {
 					grad      <- params$alpha * gnwx / params$cutoff
 					hess      <- with(params,(alpha*(1-gamma)-1) * grad / cutoff)
-					util[i,j] <- gnwx / 1-params$gamma + grad*distnw[i,j] + 0.5*hess*distnw[i,j]^2
+					util[i,j] <- gnwx / (1-params$gamma) + grad*distnw[i,j] + 0.5*hess*distnw[i,j]^2
 					cons[i,j] <- consmat[i,j]
 				}
 			}
@@ -100,7 +99,7 @@ ufun_labouR_h <- function(e,w,s,params){
 					grad      <- gwx[i,j] / params$cutoff
 					hess      <- (-params$gamma/params$cutoff) * grad
 					util[i,j] <- gwx[i,j] / (1-params$gamma) + grad*distw[i,j] + 0.5 * hess * distw[i,j]^2
-					cons[i,j] <- params$alpha * e[i,j]
+					cons[i,j] <- e[i,j]
 					labo[i,j] <- 1 - (1-params$alpha) * e[i,j]/w[i,j]
 				}
 			} else {
@@ -112,7 +111,7 @@ ufun_labouR_h <- function(e,w,s,params){
 				} else {
 					grad      <- params$alpha * gnwx / params$cutoff
 					hess      <- with(params,(alpha*(1-gamma)-1) * grad / cutoff)
-					util[i,j] <- gnwx / 1-params$gamma + grad*distnw[i,j] + 0.5*hess*distnw[i,j]^2
+					util[i,j] <- gnwx / (1-params$gamma) + grad*distnw[i,j] + 0.5*hess*distnw[i,j]^2
 					cons[i,j] <- consmat[i,j]
 				}
 			}

@@ -237,4 +237,17 @@ all.equal(cc$cons,rr$cons)	# TRUE
 all.equal(cc$labo,rr$labo)	# TRUE
 
 
+# benchmark against ufun_Atta
+# ===========================
+
+# how much slower do we get if we also compute labour supply?
+
+
+pars <- list(alpha=0.3,gamma=1.4,cutoff=0.1,mu=0.9,theta=0.3,phival=0.8)
+Res  <- outer(seq(1,4,le=1000),seq(5,-1,le=100))
+s <- sample(0:2,size=nrow(Res),replace=TRUE)
+w <- runif(nrow(Res),min=1,max=4)
+
+benchmark(atta = ufun_Atta(Res,s,pars), atta_L = ufun_Atta_L(Res,w,s,pars),replications=20)
+
 

@@ -1,5 +1,6 @@
 rm(list=ls(all=T))
 
+setwd("~/git/ArmaUtils/inst")
 
 
 # utilfun inline development and tests
@@ -574,6 +575,208 @@ all.equal(cc$cons,rr$cons)	# TRUE
 all.equal(cc$labo,rr$labo)	# TRUE
 
 
+# ufun_labour2
+# ============
+
+
+cpp.code <- '
+#include <iostream>
+using namespace std;
+using namespace arma;
+
+// BEGIN_RCPP inline adds that
+
+mat Res = Rcpp::as<arma::mat>(Res_);
+int n = Res.n_rows;
+int m = Res.n_cols;
+vec wage = Rcpp::as<arma::vec>(w_);
+
+uvec hsize = Rcpp::as<arma::uvec>(s_);
+int nh = hsize.n_elem;
+if (hsize.n_elem != Res.n_rows){
+	throw std::logic_error( "ufun_Attanasio: hsize and Res are not equal rows!" );
+	return R_NilValue;
+}
+
+if ( wage.n_elem != n){
+	throw std::logic_error("error. wage and Res are not conformable");
+	return R_NilValue;
+}
+	if ( hsize.n_elem != Res.n_rows){
+	throw std::logic_error("error. hsize and Res are not conformable");
+	return R_NilValue;
+	}
+
+uvec neg = wage <= 0;
+if ( sum(neg) > 0 ){
+	throw std::logic_error("error. wage must be positive");
+	return R_NilValue;
+}
+
+//par_ = list(alpha,xi1,xi2,gamma,cutoff)
+
+// now get parameters out of lists par 
+Rcpp::List par( par_ ) ;
+
+double theta = Rcpp::as<double>(par["theta"]);
+double phival = Rcpp::as<double>(par["phival"]);
+double mu = Rcpp::as<double>(par["mu"]);
+double gamma = Rcpp::as<double>(par["gamma"]);
+double cutoff = Rcpp::as<double>(par["cutoff"]);
+double alpha = Rcpp::as<double>(par["alpha"]);
+double xi1 = alpha * (1-gamma);
+double xi2 = (1-alpha)*(1-gamma);
+double malpha = 1-alpha;
+double mgamma = 1-gamma;
+double imgamma = 1/mgamma;
+double alphaxi1 = pow(alpha, xi1);
+double malphaxi2 = pow(malpha, xi2);
+
+Rcpp::Rcout<< " Res " << Res << endl;
+Rcpp::Rcout<< " wage " << wage << endl;
+Rcpp::Rcout<< " alpha " << alpha << endl;
+Rcpp::Rcout<< " malpha " << malpha << endl;
+Rcpp::Rcout<< " alphaxi1 " << alphaxi1 << endl;
+Rcpp::Rcout<< " malphaxi2 " << malphaxi2 << endl;
+Rcpp::Rcout<< " xi1 " << xi1<< endl;
+Rcpp::Rcout<< " xi2 " << xi2<< endl;
+Rcpp::Rcout<< " gamma " << gamma << endl;
+
+vec phivals;
+phivals << 0 << phival << 1 << endr;
+vec phivec(hsize.size());
+for (int i=0; i<nh; i++) {
+	phivec(i) = phivals( hsize( i ) );
+}
+
+
+	// repmat wage into wagemat
+	mat wagemat = repmat(wage,1,Res.n_cols);
+	mat consmat = Res - wagemat;
+	mat idmat = malpha * Res / wagemat;
+
+	// initiate return objects as zero
+	mat util(Res), cons(Res), labour(Res);
+	util.zeros();
+	cons.zeros();
+	labour.zeros();
+
+
+	// split Res according to cases:
+	// work
+	//		- pos resouces
+	//		- neg resources
+	// no work
+	//		- pos resouces
+	//		- neg resources
+	uvec iwork = find(malpha*Res < wagemat);
+	uvec inowork = find(malpha*Res >= wagemat);
+	vec workres = Res.elem(iwork);
+	vec noworkres = consmat.elem(inowork);
+	vec workwage = wagemat.elem(iwork);
+	// collect results in thress vectors each
+	vec uwork(workres), cwork(workres), lwork(workres);
+	vec unowork(noworkres), cnowork(noworkres), lnowork(noworkres);
+
+	// resources in each subcase
+	// 1) work. pos and neg resources
+	uvec iworkpos = find( workres >= cutoff );
+	uvec iworkneg = find( workres < cutoff );
+	vec workposres = workres.elem( iworkpos );
+	vec worknegres = workres.elem( iworkneg );
+	vec workposwage = workwage.elem( iworkpos );
+	vec worknegwage = workwage.elem( iworkneg );
+	// 2) NO work. pos and neg resources
+	uvec inoworkpos = find( noworkres >= cutoff );
+	uvec inoworkneg = find( noworkres < cutoff );
+	vec noworkposres = noworkres.elem( inoworkpos );
+	vec noworknegres = noworkres.elem( inoworkneg );
+	vec uworkneg  = zeros<vec>(iworkneg.n_elem);
+	vec cworkneg  = zeros<vec>(iworkneg.n_elem);
+	vec lworkneg  = zeros<vec>(iworkneg.n_elem);
+	vec unoworkneg= zeros<vec>(inoworkneg.n_elem);
+	vec cnoworkneg= zeros<vec>(inoworkneg.n_elem);
+
+//	cout << "noworknegres " << noworknegres << endl;
+//	cout << "iworkneg " << iworkneg << endl;
+//	cout << "iworkpos " << iworkpos << endl;
+//	cout << "inoworkneg " << inoworkneg << endl;
+//	cout << "inoworkpos " << inoworkpos << endl;
+
+
+	// calculate utility in each case
+	vec uworkpos = u_work_pos(alphaxi1,malphaxi2,xi2,workposres,mgamma,workposwage);
+	vec cworkpos = alpha * workposres;
+	vec lworkpos = 1 - malpha * workposres / workposwage;
+	if (!(iworkneg.is_empty())) {
+		uworkneg = u_work_neg(worknegres,cutoff,xi1,alpha,imgamma);
+		vec cworkneg = worknegres;
+		vec lworkneg = zeros<vec>(worknegres.n_elem);
+	}
+
+	// no work cases
+	vec unoworkpos = u_no_pos(noworkposres,xi1,mgamma);
+	vec cnoworkpos = alpha * noworkposres;
+	if (!(inoworkneg.is_empty())){
+		unoworkneg = u_no_neg(noworknegres,cutoff,xi1,alpha,imgamma);
+		cnoworkneg = noworknegres;
+	}
+
+	// reassemble vectors from pos/neg
+	uwork.elem(iworkpos) = uworkpos;
+	cwork.elem(iworkpos) = cworkpos;
+	lwork.elem(iworkpos) = lworkpos;
+
+	if (!(iworkneg.is_empty())){
+	//	cout << "hello2!!!!!!" << endl;
+	//	cout << "uworkneg" << uworkneg << endl;
+	//	cout << "uwork" << uwork << endl;
+	//	cout << "iworkneg" << iworkneg << endl;
+
+		uwork.elem(iworkneg) = uworkneg;
+	//	cout << "uwork" << uwork << endl;
+	//	cout << "cwork" << cwork << endl;
+	//	cout << "cworkneg" << worknegres << endl;
+
+
+		cwork.elem(iworkneg) = worknegres;
+		lwork.elem(iworkneg) = lworkneg;
+	}
+//	cout << unoworkpos << endl;
+	unowork.elem(inoworkpos) = unoworkpos;
+	cnowork.elem(inoworkpos) = cnoworkpos;
+	if (!inoworkneg.is_empty()){
+		unowork.elem(inoworkneg) = unoworkneg;
+		cnowork.elem(inoworkneg) = noworknegres;
+	}
+
+//	cout << "you are here." << endl;
+
+	//reassemble from work/nowork
+	util.elem(iwork) = uwork;
+	util.elem(inowork) = unowork;
+	cons.elem(iwork) = cwork;
+	cons.elem(inowork) = cnowork;
+	labour.elem(iwork) = lwork;
+
+	// add additive premium if houseing is of right size
+	mat phimat = repmat(phivec,1,m);
+	mat hfac = exp( theta * phimat);
+	util = util % hfac;
+	util = util + mu * phimat;
+Rcpp::List rlist = Rcpp::List::create( _["utility"] = util, _["consumption"] = cons , _["labour"] = labour);
+return rlist;
+'
+
+ufun_labour2 <- cxxfunction(signature(Res_="matrix",w_="numeric",s_="numeric",par_="list"),body=cpp.code,plugin="RcppArmadillo",includes="#include </Users/florianoswald/Dropbox/code-backup/eclipse-cpp/arma-tests/arma-tests/src/arma-head.h>")
+pars <- list(alpha=0.3,gamma=1.4,cutoff=0.1,mu=0.9,theta=0.3,phival=0.8)
+Res  <- outer(1:4,5:-1)
+w <- runif(4,min=1,max=4)
+s <- c(0,0,1,2)
+cc <- ufun_labour2(Res,w,s,pars)
+rr <- ufun_labouR_h(Res,w,s,pars) 	# same function in R
+
+
 # KronProdSPMat4: c++ kronecker product for 4 dimensions. geared towards spline basis matrices.
 # =============================================================================================
 
@@ -676,4 +879,37 @@ y <- as.numeric(1:(ncol(aa)*ncol(bb)*ncol(cc)*ncol(dd)))
 
 # call
 kroncpp4(aa,bb,cc,dd,y)
+
+
+
+
+# testing with a header file
+
+cpp.code <- '
+using namespace std;
+using namespace arma;
+
+// map R objects
+
+mat Res = Rcpp::as<arma::mat>(Res_);
+vec wage = Rcpp::as<arma::vec>(w_);
+uvec hsize = Rcpp::as<arma::uvec>(s_);
+Rcpp::List par( par_ ) ;
+
+// call C++ function
+Rcpp::List result = ufun_labour2(Res,par,hsize,wage);
+
+// return
+return result;
+'
+ufun_labour2 <- cxxfunction(signature(Res_="matrix",w_="numeric",s_="numeric",par_="list"),body=cpp.code,plugin="RcppArmadillo",includes="#include </Users/florianoswald/git/ArmaUtils/inst/inc_util.h>")
+pars <- list(alpha=0.3,gamma=1.4,cutoff=0.1,mu=0.9,theta=0.3,phival=0.8)
+Res  <- outer(1:4,5:-1)
+w <- runif(4,min=1,max=4)
+s <- c(0,0,1,2)
+cc <- ufun_labour2(Res,w,s,pars)
+rr <- ufun_labouR_h(Res,w,s,pars) 	# same function in R
+
+
+
 

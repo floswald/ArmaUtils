@@ -161,6 +161,8 @@ SEXP ufun_Attanasio( SEXP Res_, SEXP s_, SEXP par_)
 
 
 
+
+
 SEXP ufun_Attanasio_L( SEXP Res_, SEXP w_,SEXP s_, SEXP par_){
 
 	BEGIN_RCPP
@@ -283,8 +285,7 @@ SEXP ufun_Attanasio_L( SEXP Res_, SEXP w_,SEXP s_, SEXP par_){
 					if( Res(i,j) < cutoff ){
 						// entry j is below cutoff
 						retu(i,j) = approxw(Res(i,j),cutoff,alphaxi1,malphaxi2, mgamma,imgamma, wagemat(i,j), xi2, gamma);
-						retc(i,j) = Res(i,j) * alpha;   // that is not the correct approx.
-						retn(i,j) = 1- idmat(i,j);      // neither is this. but those neg cons values are not useful anyway.
+						retc(i,j) = Res(i,j) ;   // that is not the correct approx.
 					} else {
 						// entry j is not
 						g = alphaxi1 * malphaxi2 * pow( Res(i,j), mgamma) / pow( wagemat(i,j), xi2) ;
@@ -317,5 +318,20 @@ SEXP ufun_Attanasio_L( SEXP Res_, SEXP w_,SEXP s_, SEXP par_){
 	END_RCPP
 }
 
+
+// Alternative implementation
+SEXP ufun_Attanasio_L2( SEXP Res_, SEXP w_,SEXP s_, SEXP par_){
+	
+	BEGIN_RCPP
+
+	mat Res = Rcpp::as<arma::mat>(Res_);
+	vec wage = Rcpp::as<arma::vec>(w_);
+	uvec hsize = Rcpp::as<arma::uvec>(s_);
+	Rcpp::List par( par_ ) ;
+
+	return wrap( ufun_Atta_L2(Res, par, hsize, wage) );
+
+	END_RCPP
+}
 
 
