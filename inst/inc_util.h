@@ -43,20 +43,17 @@ vec u_work_neg(vec cons,double x,double alphaxi1,double malphaxi2, double xi2, d
 	return imgamma * g + (grad % diff) + 0.5 * hess % pow(diff,2);
 }
 
-// quadratic approx for NO work!
-double approx(double cons,double x,double alpha,double gamma){
+// quadradtic approximation function for case of no work
+double approx(double cons,double x,double xi1,double alpha,double imgamma){
 	double g,grad,hess,diff;
-	double xi1 = alpha * (1-gamma);
-    double imgamma = 1/(1-gamma);
-	g = pow( x, xi1) ;
+	g = pow( x, xi1);
 	grad = alpha*g / x;
 	hess = (xi1 -1) * grad / x;
 	diff = cons - x;
 	return imgamma * g + (grad * diff) + 0.5 * hess * pow(diff,2);
 }
 
-
-// quadratic approx for work scalar
+// quadratic approx for work
 double approxw(double cons, double x,double alphaxi1,double malphaxi2, double mgamma, double imgamma, double wage, double xi2, double gamma){
 	double g,grad,hess,diff;
 	g = alphaxi1 * malphaxi2 * pow( x, mgamma) / pow( wage, xi2) ;

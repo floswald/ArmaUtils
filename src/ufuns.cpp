@@ -167,6 +167,8 @@ SEXP ufun_Attanasio_L( SEXP Res_, SEXP w_,SEXP s_, SEXP par_){
 
 	BEGIN_RCPP
 
+// this function has a design fault. at certain values there's an index out of bounds.
+
 		// map R objects to armadillo
 	mat Res = Rcpp::as<arma::mat>(Res_);
 	int n = Res.n_rows;
