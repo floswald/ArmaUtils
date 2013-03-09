@@ -100,7 +100,7 @@ ufun_labouR_h <- function(e,w,s,params){
 					hess      <- (-params$gamma/params$cutoff) * grad
 					util[i,j] <- gwx[i,j] / (1-params$gamma) + grad*distw[i,j] + 0.5 * hess * distw[i,j]^2
 					cons[i,j] <- e[i,j]
-					labo[i,j] <- 1 - (1-params$alpha) * e[i,j]/w[i,j]
+					#                     labo[i,j] <- 1 - (1-params$alpha) * e[i,j]/w[i,j]
 				}
 			} else {
 				# don't work. 

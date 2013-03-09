@@ -221,8 +221,11 @@ krons <- function( y, matrices ){
 	n <- length(matrices)
 	alldgC <- lapply(1:n,function(i) class(matrices[[i]])[1]=="dgCMatrix")
 	stopifnot(all(unlist(alldgC)))
-	stopifnot( prod(unlist(lapply(matrices,nrow))) == length(y) )
-	if (n==4) .Call( "kron4", matrices[[1]], matrices[[2]],matrices[[3]],matrices[[4]], y, PACKAGE = "ArmaUtils" )
+	stopifnot( prod(unlist(lapply(matrices,ncol))) == length(y) )
+	if (n==4) res <- .Call( "kron4", matrices[[1]], matrices[[2]],matrices[[3]],matrices[[4]], y, PACKAGE = "ArmaUtils" )
+	if (n==3) res <- .Call( "kron3", matrices[[1]], matrices[[2]],matrices[[3]], y, PACKAGE = "ArmaUtils" )
+	if (n==2) res <- .Call( "kron2", matrices[[1]], matrices[[2]], y, PACKAGE = "ArmaUtils" )
+	return(res)
 }
 
 

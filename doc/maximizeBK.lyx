@@ -1,0 +1,351 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass article
+\begin_preamble
+\usepackage{natbib}
+\usepackage{url}
+\end_preamble
+\use_default_options true
+\begin_modules
+knitr
+\end_modules
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize 11
+\spacing single
+\use_hyperref false
+\papersize a4paper
+\use_geometry true
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 1
+\use_mathdots 1
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\use_refstyle 0
+\boxbgcolor #dbdbdb
+\branch answer
+\selected 1
+\filename_suffix 0
+\color #faf0e6
+\end_branch
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 2cm
+\rightmargin 2cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation skip
+\defskip smallskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+period maximization problem with labor supply
+\end_layout
+
+\begin_layout Section
+problem setup
+\end_layout
+
+\begin_layout Standard
+We have this problem from the paper in case of no bankruptcy 
+\begin_inset Formula 
+\begin{eqnarray*}
+v(a,w) & = & \max_{a',n}u(c,1-n)+\beta\int v(a',w')g(w'|w)dw'\\
+s.t.\\
+c+ra' & = & a+wn\\
+c & \geq & 0\\
+0 & \leq n & \leq1\\
+a' & \geq & \underline{a}
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+and 
+\begin_inset Formula 
+\begin{eqnarray*}
+v(a,w) & = & \max_{a',n}u(c,1-n)+\beta\int v(a',w')g(w'|w)dw'\\
+s.t.\\
+c+ra' & = & a+\gamma wn\\
+c & \geq & 0\\
+0 & \leq n & \leq1\\
+a' & \geq & \underline{a}
+\end{eqnarray*}
+
+\end_inset
+
+where 
+\begin_inset Formula $\gamma\in[0,1],\, r=\frac{1}{1+R}$
+\end_inset
+
+ and R is the interest rate.
+ Focus on the bankruptcy case here.
+ so Just adding a tax.
+\end_layout
+
+\begin_layout Subsection
+simplify 
+\begin_inset Formula $v$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The focus here is on 
+\begin_inset Formula $v$
+\end_inset
+
+ since I want to get rid of the maximization over labor supply.
+ There are 2 tradeoffs: one concerns consumption now vs consumption later
+ and the other concerns how to allocate time between work and leisure.
+ Suppose we decide first on the intertemporal tradeoff and then on how to
+ allcoate time.
+ Suppose we call 
+\begin_inset Formula $G(a')=a-ra'$
+\end_inset
+
+ 
+\begin_inset Quotes eld
+\end_inset
+
+resources after savings choice
+\begin_inset Quotes erd
+\end_inset
+
+.
+ We rewrite our model
+\begin_inset Formula 
+\begin{eqnarray*}
+v(a,w) & = & \max_{a',n}u(c,1-n)+\beta\int v(a',w')g(w'|w)dw'\\
+s.t.\\
+c & = & \gamma wn+G(a')\\
+c & \geq & 0\\
+0 & \leq n & \leq1\\
+a' & \geq & \underline{a}
+\end{eqnarray*}
+
+\end_inset
+
+Now, this can be re-written even further, recognizing that 
+\begin_inset Formula $\max_{x,y}f(x,y)=\max_{x}\left(\max_{y}f(x,y)\right)$
+\end_inset
+
+:
+\begin_inset Formula 
+\begin{eqnarray*}
+v(a,w) & = & \max_{a'}\left(\max_{n}u\left(\gamma wn+G(a'),1-n\right)\right)+\beta\int v(a',w')g(w'|w)dw'\\
+s.t.\\
+c & = & wn+G(a')\\
+c & \geq & 0\\
+0 & \leq n & \leq1\\
+a' & \geq & \underline{a}
+\end{eqnarray*}
+
+\end_inset
+
+If we assume cobb-douglas then for the case of an interior maximium of 
+\begin_inset Formula $n$
+\end_inset
+
+, i.e.
+ the case 
+\begin_inset Formula $n\in(0,1)$
+\end_inset
+
+, the inner maximization problem has an optimum at 
+\begin_inset Formula $\partial u/\partial n=0$
+\end_inset
+
+:
+\begin_inset Formula 
+\begin{eqnarray*}
+u\left(wn+G(a'),1-n\right) & \equiv & \left(wn+G(a')\right)^{\alpha}\left(1-n\right)^{1-\alpha}\\
+\frac{\partial u}{\partial n} & = & \alpha w\left(wn+G(a')\right)^{\alpha-1}\left(1-n\right)^{1-\alpha}+\left(wn+G(a')\right)^{\alpha}(1-\alpha)\left(1-n\right)^{-\alpha}(-1)\\
+ & = & 0\\
+\Rightarrow\\
+\alpha w\left(wn+G(a')\right)^{\alpha-1}\left(1-n\right)^{1-\alpha} & = & (1-\alpha)\left(wn+G(a')\right)^{\alpha}\left(1-n\right)^{-\alpha}\\
+w\frac{\alpha}{1-\alpha} & = & \frac{\left(wn+G(a')\right)}{(1-n)}\\
+ &  & \text{substitute }l\equiv1-n\\
+w\frac{\alpha}{1-\alpha} & = & \frac{\left(w(1-l)+G(a')\right)}{l}\\
+w\frac{\alpha}{1-\alpha} & = & \frac{w+G(a')}{l}-w\\
+w\left(1+\frac{\alpha}{1-\alpha}\right) & = & \frac{w+G(a')}{l}\\
+w\frac{1}{1-\alpha} & = & \frac{w+G(a')}{l}\\
+l^{*} & = & (1-\alpha)\frac{w+G(a')}{w}\\
+c^{*} & = & w(1-l^{*})+G(a')\\
+ & = & w\left[1-(1-\alpha)\frac{w+G(a')}{w}\right]+G(a')\\
+ & = & w+G(a')-(1-\alpha)(w+G(a'))\\
+ & = & \alpha(w+G(a'))
+\end{eqnarray*}
+
+\end_inset
+
+that, finally means that our maximization problem really reduces to choosing
+ savings only: 
+\begin_inset Formula 
+\begin{eqnarray*}
+v(a,w) & = & \max_{a'}\left(\max_{n}u\left(wn+G(a'),1-n\right)\right)+\beta\int v(a',w')g(w'|w)dw'\\
+ & = & \max_{a'}u\left(\alpha\left(G(a')+w\right),(1-\alpha)\frac{w+G(a')}{w}\right)+\beta\int v(a',w')g(w'|w)dw'\\
+ & = & \max_{a'}\left[\alpha\left(G(a')+w\right)\right]^{\alpha}\left[(1-\alpha)\frac{w+G(a')}{w}\right]^{1-\alpha}+\beta\int v(a',w')g(w'|w)dw'
+\end{eqnarray*}
+
+\end_inset
+
+and this is subject to 2 constraints:
+\begin_inset Formula 
+\begin{eqnarray*}
+c & = & \alpha\left(G(a')+w\right)\geq0\\
+l & = & (1-\alpha)\frac{w+G(a')}{w}\in(0,1)
+\end{eqnarray*}
+
+\end_inset
+
+Now notice that if leisure function becomes one, i.e.
+ if 
+\begin_inset Formula $(1-\alpha)\frac{w+a-F-ra'}{w}>1$
+\end_inset
+
+, then labor supply drops to 
+\begin_inset Formula $n=0$
+\end_inset
+
+ and 
+\begin_inset Formula $l=1$
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{1}{R}(a-F-\frac{\alpha}{1-\alpha}w)>a'
+\]
+
+\end_inset
+
+the implication is that if I choose a level of savings such that this is
+ true, then 
+\begin_inset Formula $l^{*}=1,n^{*}=0,v=v_{0}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section
+CRRA utility
+\end_layout
+
+\begin_layout Standard
+If there are other sources of (non-labor) income 
+\begin_inset Formula $y$
+\end_inset
+
+, this alters 
+\begin_inset Formula $G(a')=y+a-Ra'$
+\end_inset
+
+, and 
+\begin_inset Formula $a'\in\left[\frac{1}{R}\left[-w\frac{\alpha}{1-\alpha}+y+a\right],\frac{1}{R}(a+y+w)\right]$
+\end_inset
+
+.
+ Now, if 
+\begin_inset Formula $u()$
+\end_inset
+
+ is actually a CRRA with a nested cobb douglas this changes the objective
+ slightly to
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+V(a) & = & \max_{a'}\frac{\left(\left[\alpha\left(w+y+a-Ra'\right)\right]^{\alpha}\left[(1-\alpha)\frac{w+y+a-Ra'}{w}\right]^{1-\alpha}\right)^{1-\sigma}-1}{1-\sigma}+\beta V(a')\\
+ & = & \max_{a'}\frac{\left[\alpha\left(w+y+a-Ra'\right)\right]^{\alpha(1-\sigma)}\left[(1-\alpha)\frac{w+y+a-Ra'}{w}\right]^{(1-\alpha)(1-\sigma)}-1}{1-\sigma}+\beta V(a')\\
+ & = & \max_{a'}\frac{\alpha^{\alpha(1-\sigma)}(1-\alpha)^{(1-\alpha)(1-\sigma)}\left(w+y+a-Ra'\right)^{\alpha(1-\sigma)}\left(\frac{w+y+a-Ra'}{w}\right)^{(1-\alpha)(1-\sigma)}-1}{1-\sigma}+\beta V(a')\\
+ & = & \max_{a'}\frac{Ax^{\alpha(1-\sigma)}\left(\frac{x}{w}\right)^{(1-\alpha)(1-\sigma)}-1}{1-\sigma}+\beta V(a')\\
+\text{where} &  & A\equiv\alpha^{\alpha(1-\sigma)}(1-\alpha)^{(1-\alpha)(1-\sigma)},x\equiv w+y+a-Ra'\\
+ & = & \max_{a'}\frac{Ax^{\alpha(1-\sigma)+(1-\alpha)(1-\sigma)}w^{-(1-\alpha)(1-\sigma)}-1}{1-\sigma}+\beta V(a')\\
+ & = & \max_{a'}\frac{Ax^{(1-\sigma)}w^{-(1-\alpha)(1-\sigma)}-1}{1-\sigma}+\beta V(a')\\
+ & = & \max_{a'}\frac{\left(w+y+a-Ra'\right)^{(1-\sigma)}\frac{\alpha^{\alpha(1-\sigma)}(1-\alpha)^{(1-\alpha)(1-\sigma)}}{w^{(1-\alpha)(1-\sigma)}}-1}{1-\sigma}+\beta V(a')
+\end{eqnarray*}
+
+\end_inset
+
+which happens to be exactly what Lars wrote.
+ Now define 
+\begin_inset Formula $\phi_{1}=\alpha^{\alpha(1-\sigma)}(1-\alpha)^{(1-\alpha)(1-\sigma)}$
+\end_inset
+
+ and 
+\begin_inset Formula $\phi_{2}=(1-\alpha)(1-\sigma)$
+\end_inset
+
+
+\begin_inset Formula 
+\begin{eqnarray*}
+V(a) & = & \max_{a'}\frac{\left(w+y+a-Ra'\right)^{(1-\sigma)}\frac{\phi_{1}}{w^{\phi_{2}}}-1}{1-\sigma}+\beta V(a')
+\end{eqnarray*}
+
+\end_inset
+
+So an easy way to compute this is to define 
+\begin_inset Formula $Res=w+y+a-F$
+\end_inset
+
+, where I now introduced the fixed cost of work, and just maximize on each
+ state 
+\begin_inset Formula $(a,y,w)$
+\end_inset
+
+ -- after we make the future value dependent on those values -- 
+\begin_inset Formula 
+\begin{eqnarray*}
+V(a) & = & \max_{a'}\frac{\left(Res-Ra'\right)^{(1-\sigma)}\frac{\phi_{1}}{w^{\phi_{2}}}-1}{1-\sigma}+\beta V(a')
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

@@ -5,5 +5,7 @@
 #include <RcppEigen.h>
 
 RcppExport SEXP kron4( SEXP aa0, SEXP aa1, SEXP aa2, SEXP aa3, SEXP yy ) ; 
+RcppExport SEXP kron3( SEXP aa0, SEXP aa1, SEXP aa2, SEXP yy ) ; 
+RcppExport SEXP kron2( SEXP aa0, SEXP aa1, SEXP yy ) ; 
 
 #endif
