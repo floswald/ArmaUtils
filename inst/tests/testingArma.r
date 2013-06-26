@@ -12,7 +12,7 @@ library(rbenchmark)
 #### Useage 1: find the unrestricted maximal element for each row of a matrix
 
 context("testing armamax")
-A <- matrix(rnorm(200000),nrow=400,ncol=500)
+A <- matrix(rnorm(200000),nrow=40000,ncol=5)
 result <- armamax(A)
 test_that("A is a list",{
 		  expect_that( is.list(result), is_true() )})
@@ -31,7 +31,15 @@ bmk.cols <- c("test","replications","elapsed","relative","user.self","sys.self")
 benchmark(R=list(apply(A,1,max),apply(A,1,which.max)),armamax=armamax(A),replications=50,columns=bmk.cols)
 
 # benchmark against 1 call to apply() only
-benchmark(R=apply(A,1,max),armamax=armamax(A),replications=50,columns=bmk.cols)
+benchmark(R=apply(A,1,which.max),armamax=armamax(A),replications=20,columns=bmk.cols)
+benchmark(R=apply(A,1,max),armamax=armamax(A),replications=20,columns=bmk.cols)
+
+# benchmark against 1 call to pmax only
+all.equal(pmax(A[,1],A[,2],A[,3],A[,4],A[,5]),as.numeric(armamax(A)$values))
+all.equal(do.call(pmax,as.data.frame(A)),as.numeric(armamax(A)$values))
+benchmark(R=pmax(A[,1],A[,2],A[,3],A[,4],A[,5]),armamax=armamax(A),replications=100,columns=bmk.cols)
+Ad = as.data.frame(A)
+benchmark(R=do.call(pmax,Ad),armamax=armamax(A),replications=100,columns=bmk.cols)
 
 
 
@@ -298,6 +306,28 @@ test_that("non-integer house size throws an error",{
 test_that("house size outside of c(0,1,2) throws an error",{
 		  expect_that( ufun_Atta_L(Res,w,3,pars), throws_error() )})
 
+# test ufun_Atta_disc
+# ===================
+
+pars <- list(alpha=0.3,gamma=1.4,cutoff=0.1,mu=0.9,theta=0.3,phival=0.8)
+Res  <- outer(1:4,5:-1)
+lab <- c(0,1,0,1)
+s <- c(0,0,1,2)
+cc <- ufun_Atta_disc(Res,s,lab,pars)
+source("../rtests.r")
+rr <- ufun_labouR_disc(Res,s,lab,pars) 	# same function in R
+
+context("testing ufun with discrete labor supply, ufun_Atta_disc")
+test_that("all components of ufun_Atta_disc are numeric",{
+		  expect_that( all(unlist(lapply(cc,is.numeric))), is_true() )})
+test_that("c utility is equal to R utility",{
+		  expect_that( all.equal(cc,rr), is_true() )})
+test_that("non-integer house size throws an error",{
+		  expect_that( ufun_Atta_disc(Res,0.2,lab,pars), throws_error() )})
+test_that("house size outside of c(0,1,2) throws an error",{
+		  expect_that( ufun_Atta_disc(Res,3,lab,pars), throws_error() )})
+test_that("scalar labor supply throws error",{
+		  expect_that( ufun_Atta_disc(Res,3,1,pars), throws_error() )})
 
 # benchmark against ufun_Atta
 # ===========================

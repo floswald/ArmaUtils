@@ -178,6 +178,9 @@ armakron <- function(y,matrices){
 }
 
 
+# utility functions
+# =================
+
 utilfun <- function( Resources, hsize, age, params, xi, own ){
 	if (is.null(dim(Resources))) Resources <- matrix(Resources,nrow=length(Resources),ncol=1)
 	.Call( "utilfun", Resources, hsize, age, params, xi, own, PACKAGE = "ArmaUtils" )
@@ -214,6 +217,18 @@ ufun_Atta_L2 <- function( Resources, wage, hsize, params ){
 	.Call( "ufun_Attanasio_L2", Resources, wage, hsize, params, PACKAGE = "ArmaUtils" )
 }
 
+ufun_Atta_disc <- function( Resources, hsize, labor, params ){
+	if (is.null(dim(Resources))) Resources <- matrix(Resources,nrow=length(Resources),ncol=1)
+	if (is.null(dim(hsize))) hsize <- matrix(hsize,nrow=nrow(Resources),ncol=1)
+	if (is.null(dim(labor))) labor <- matrix(labor,nrow=nrow(Resources),ncol=1)
+	if (!all(hsize %in% 0:2)) stop("hsize needs to be one of 0,1,2")
+	stopifnot(is.list(params))
+	stopifnot(!any(unlist(lapply(params,is.null))))
+	.Call( "ufun_discLabor", Resources, labor , hsize, params, PACKAGE = "ArmaUtils" )
+}
+
+
+
 # takes y and a list of matrices to compute kronecker of matrics times y. matrices can be sparse or dense (only sparse implemented)
 krons <- function( y, matrices ){
 	stopifnot(is.list(matrices))
@@ -227,5 +242,7 @@ krons <- function( y, matrices ){
 	if (n==2) res <- .Call( "kron2", matrices[[1]], matrices[[2]], y, PACKAGE = "ArmaUtils" )
 	return(res)
 }
+
+
 
 

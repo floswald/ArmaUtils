@@ -9,6 +9,139 @@ library(inline)
 library(RcppArmadillo)
 library(RcppEigen)
 
+
+# extension to armamax: na.rm
+# ===========================
+
+
+body <- 'arma::mat m = Rcpp::as<arma::mat>(mR);
+		 int n = m.n_rows;
+		 int k = m.n_cols;
+         arma::umat u(n,k);
+         for (int i=0;i < n; i++){
+			for (int j=0;j<k;j++){
+ 				u(i,j) = arma::is_finite(m(i,j));
+			}
+		}
+		return Rcpp::wrap(u);'
+
+
+f <- cxxfunction(signature(mR="matrix"),body=body,plugin="RcppArmadillo")
+
+mat <- matrix(sample(c(NA,1:5),size=36,replace=T),6,6)
+f(mat)
+
+# extension to armamax2: na.rm and a switch
+# ===========================
+
+# found out:
+# 1) armadillo understands on a simple matrix with NAs how to get the row max
+# 2) unfortunately, my utility function does something weird and the result does not look right
+# 3) basically it does not understand how to pass an NA is savings through utility etc
+# 4) has to do with the negative consumption correction.
+body <- 'arma::mat m = Rcpp::as<arma::mat>(mR);
+    	 bool b = Rcpp::as<bool>(lbound);  
+		 int n = m.n_rows;
+		 int k = m.n_cols;
+		 arma::vec y(n);
+		 arma::uword ix;
+		 arma::uvec ixout(n);
+		 arma::uvec u(k);
+		 arma::rowvec tmpvec(k);
+		 arma::rowvec tmpvec2;
+		 if (b){
+			 for (int i=0;i<n;i++){
+			 // get current row
+				 tmpvec = m.row(i);
+				 // for this row, find all infinite indexes
+				for (int j=0;j<k;j++){
+					u(j) = arma::is_finite(tmpvec(j));
+				}
+			 	// max over row
+				// while is.na(u[j]), increase j to get to first non-na u[j]
+				int j = 0;
+				while ( !u(j) ){
+					j += 1;
+				}
+				tmpvec2 = tmpvec.subvec(j,k-1);
+				y(i) = tmpvec2.max(ix);
+				ixout(i) = ix;
+			 }
+		 } else {
+			 for (int i=0;i<n;i++){
+				 tmpvec = m.row(i);
+				 y(i) = tmpvec.max(ix);
+				 ixout(i) = ix;
+			 }
+		 }
+		 Rcpp::Rcout << y << std::endl;
+		Rcpp::List list = Rcpp::List::create( _["values"] = y, _["idx"] = ixout);
+		return(list);'
+
+
+f <- cxxfunction(signature(mR="matrix",lbound="logical"),body=body,plugin="RcppArmadillo")
+
+# mat <- matrix(sample(c(NA,1:5),size=36,replace=T),6,6)
+mat <- outer(1:5,1:5,"-")
+mat[mat<0] <- NA
+f(mR=mat,lbound=FALSE)
+f(mR=mat,lbound=TRUE)
+mat[1,5] <- 10
+
+# extension to armamax3: na.rm and a switch
+# ===========================
+
+# this is pretty awesome.
+body <- 'arma::mat m = Rcpp::as<arma::mat>(mR);
+         arma::mat m2 = Rcpp::as<arma::mat>(m2R);
+		 return wrap( m + m2 );'
+
+
+f <- cxxfunction(signature(mR="matrix",m2R="matrix"),body=body,plugin="RcppArmadillo")
+
+mat <- matrix(sample(c(NA,1:5),size=36,replace=T),5,5)
+mat2 <- outer(1:5,1:5,"-")
+mat2[mat2<0] <- NA
+f(mR=mat,m2R=mat2)
+f(mR=mat,lbound=TRUE)
+# benchmarking armamax against apply and pmax
+# =========================================
+library(inline)
+library(Rcpp)
+
+cpp <- 'arma::mat A  = Rcpp::as<arma::mat>(X_);
+	arma::vec y(A.n_rows);
+	arma::rowvec tmp(A.n_cols);
+  for (int i=0; i<A.n_rows; i++) {
+    tmp = A.row(i);
+    y(i) = tmp.max();
+  }
+return wrap(y);
+'
+
+cat('rows >> columns')
+armaf <- cxxfunction(signature(X_="matrix"),body=cpp,plugin="RcppArmadillo")
+A = matrix(rnorm(400000),2000,50)
+Ad = as.data.frame(A)
+all.equal(do.call(pmax,as.data.frame(A)),as.numeric(armaf(A)))
+benchmark(R.do.call=do.call(pmax,Ad),armamax=armaf(A),replications=100)
+benchmark(R.apply=apply(A,1,max),armamax=armaf(A),replications=100)
+
+cat('columns >> rows')
+A = matrix(rnorm(400000),50,2000)
+Ad = as.data.frame(A)
+all.equal(do.call(pmax,as.data.frame(A)),as.numeric(armaf(A)))
+benchmark(R.do.call=do.call(pmax,Ad),armamax=armaf(A),replications=100)
+benchmark(R.apply=apply(A,1,max),armamax=armaf(A),replications=100)
+
+
+
+
+
+
+# utility function
+# ================
+
 cppcode <- '
 #include <iostream>
 using namespace std;

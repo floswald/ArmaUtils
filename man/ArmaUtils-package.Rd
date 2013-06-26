@@ -10,8 +10,9 @@ It has the following functionality: \cr
 \tabular{ll}{
 compute u(c,h): \tab \code{\link{utilfun}} computes u(c,h) \cr
 compute u(c,h): \tab \code{\link{ufun_Atta}} computes u(c,h) after Wakefield et al. \cr
-compute u(c,l,h): \tab \code{\link{ufun_Atta_L}} computes u(c,l,h) \cr
-max u(S,x) + b * V(S'|S,x): \tab \code{\link{armamax}} pointwise max \cr
+compute u(c,l,h): \tab \code{\link{ufun_Atta_L}} computes u(c,l,h) with continuous l\cr
+compute u(c,l,h): \tab \code{\link{ufun_Atta_disc}} computes u(c,l,h) with discrete l\cr
+max u(S,x) + b * V(S'|S,x): \tab \code{\link{armamax}} rowwise max \cr
 approximate V(S'): \tab \code{\link{armakron}} obtain B-spline coefficients \cr
 evaluate approximations of V(S'): \tab \code{\link{krons}} evaluate B-spline coeffs\cr
 }}

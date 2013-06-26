@@ -337,3 +337,17 @@ SEXP ufun_Attanasio_L2( SEXP Res_, SEXP w_,SEXP s_, SEXP par_){
 }
 
 
+// discrete labor supply utility function
+SEXP ufun_discLabor( SEXP Res_, SEXP l_,SEXP s_, SEXP par_){
+	
+	BEGIN_RCPP
+
+	mat Res = Rcpp::as<arma::mat>(Res_);
+	vec labor = Rcpp::as<arma::vec>(l_);
+	uvec hsize = Rcpp::as<arma::uvec>(s_);
+	Rcpp::List par( par_ ) ;
+
+	return wrap( ufun_discreteL(Res, par, hsize, labor) );
+
+	END_RCPP
+}
