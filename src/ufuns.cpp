@@ -7,6 +7,7 @@ using namespace arma ;
 // u(c,h,l,H,n,theta,age,wage)
 SEXP utilfun( SEXP Res_, SEXP s_, SEXP age_, SEXP par_, SEXP xi_, SEXP own_ )
 {
+    signal(SIGSEGV, handler);   // install our handler
 	mat Res = Rcpp::as<arma::mat>(Res_);
 	vec siz = Rcpp::as<arma::vec>(s_);
 	int age = Rcpp::as<int>(age_);	// age
@@ -91,6 +92,7 @@ SEXP utilfun( SEXP Res_, SEXP s_, SEXP age_, SEXP par_, SEXP xi_, SEXP own_ )
 // matrix
 SEXP ufun_Attanasio( SEXP Res_, SEXP s_, SEXP par_)
 {
+    signal(SIGSEGV, handler);   // install our handler
 
 	BEGIN_RCPP
 
@@ -165,6 +167,7 @@ SEXP ufun_Attanasio( SEXP Res_, SEXP s_, SEXP par_)
 
 SEXP ufun_Attanasio_L( SEXP Res_, SEXP w_,SEXP s_, SEXP par_){
 
+    signal(SIGSEGV, handler);   // install our handler
 	BEGIN_RCPP
 
 // this function has a design fault. at certain values there's an index out of bounds.
@@ -324,6 +327,7 @@ SEXP ufun_Attanasio_L( SEXP Res_, SEXP w_,SEXP s_, SEXP par_){
 // Alternative implementation
 SEXP ufun_Attanasio_L2( SEXP Res_, SEXP w_,SEXP s_, SEXP par_){
 	
+    signal(SIGSEGV, handler);   // install our handler
 	BEGIN_RCPP
 
 	mat Res = Rcpp::as<arma::mat>(Res_);

@@ -18,6 +18,7 @@ Eigen::VectorXd KronProdSPMat4(
 		Eigen::SparseMatrix<double, Eigen::RowMajor> a3,
 		Eigen::VectorXd y) {
 
+    signal(SIGSEGV, handler);   // install our handler
 	Eigen::VectorXd retvec;
 	retvec.setZero( a0.rows() * a1.rows() * a2.rows() * a3.rows()  );
 
@@ -76,6 +77,7 @@ Eigen::VectorXd KronProdSPMat3(
 		Eigen::SparseMatrix<double, Eigen::RowMajor> a2,
 		Eigen::VectorXd y) {
 
+    signal(SIGSEGV, handler);   // install our handler
 	Eigen::VectorXd retvec;
 	retvec.setZero( a0.rows() * a1.rows() * a2.rows()  );
 
@@ -122,6 +124,7 @@ Eigen::VectorXd KronProdSPMat2(
 		Eigen::SparseMatrix<double, Eigen::RowMajor> a1,
 		Eigen::VectorXd y) {
 
+    signal(SIGSEGV, handler);   // install our handler
 	Eigen::VectorXd retvec;
 	retvec.setZero( a0.rows() * a1.rows()  );
 
@@ -150,6 +153,7 @@ Eigen::VectorXd KronProdSPMat2(
 
 SEXP kron4( SEXP aa0, SEXP aa1, SEXP aa2, SEXP aa3, SEXP yy )
 {
+    signal(SIGSEGV, handler);   // install our handler
 
 	BEGIN_RCPP
 
@@ -173,6 +177,7 @@ SEXP kron4( SEXP aa0, SEXP aa1, SEXP aa2, SEXP aa3, SEXP yy )
 SEXP kron3( SEXP aa0, SEXP aa1, SEXP aa2, SEXP yy )
 {
 
+    signal(SIGSEGV, handler);   // install our handler
 	BEGIN_RCPP
 
 	const MappedSparseMatrix<double> a0(as<MappedSparseMatrix<double> >(aa0));
@@ -194,6 +199,7 @@ SEXP kron3( SEXP aa0, SEXP aa1, SEXP aa2, SEXP yy )
 
 SEXP kron2( SEXP aa0, SEXP aa1, SEXP yy )
 {
+    signal(SIGSEGV, handler);   // install our handler
  
 	BEGIN_RCPP
 

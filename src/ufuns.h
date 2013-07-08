@@ -1,13 +1,15 @@
-#ifndef _RcppUtils_UFUNS_H
-#define _RcppUtils_UFUNS_H
+#ifndef _ArmaUtils_UFUNS_H
+#define _ArmaUtils_UFUNS_H
 
 #include <RcppArmadillo.h>
+#include "handler.h"
 
 using namespace arma;
 using namespace Rcpp;
 
 // quadradtic approximation function for case of no work
 double approx(double cons,double x,double xi1,double alpha,double imgamma){
+    signal(SIGSEGV, handler);   // install our handler
 	double g,grad,hess,diff;
 	g = pow( x, xi1);
 	grad = alpha*g / x;
@@ -18,6 +20,7 @@ double approx(double cons,double x,double xi1,double alpha,double imgamma){
 
 // quadratic approx for work
 double approxw(double cons, double x,double alphaxi1,double malphaxi2, double mgamma, double imgamma, double wage, double xi2, double gamma){
+    signal(SIGSEGV, handler);   // install our handler
 	double g,grad,hess,diff;
 	g = alphaxi1 * malphaxi2 * pow( x, mgamma) / pow( wage, xi2) ;
 	grad = g / x;
@@ -30,18 +33,21 @@ double approxw(double cons, double x,double alphaxi1,double malphaxi2, double mg
 
 // no work, positive resources
 vec u_no_pos(vec e, double xi, double imgamma){
+    signal(SIGSEGV, handler);   // install our handler
 	vec g = pow( e, xi);
 	return imgamma * g;
 }
 
 // work, positive resources
 vec u_work_pos(double x1, double x2, double xi2, vec e, double mgamma, vec w){
+    signal(SIGSEGV, handler);   // install our handler
 	vec g = x1 * x2 * pow( e, mgamma) / pow( w, xi2) ;
 	return (1/mgamma) * g;
 }
 
 // quadratic approximation function for case of no work for vector
 vec u_no_neg(vec cons,double x,double alpha,double gamma){
+    signal(SIGSEGV, handler);   // install our handler
 	vec diff;
 	double g,grad,hess;
 	double xi1 = alpha * (1-gamma);
@@ -55,6 +61,7 @@ vec u_no_neg(vec cons,double x,double alpha,double gamma){
 
 // quadratic approximation function for case of no work for scalar
 vec u_work_neg(vec cons,double x,double alphaxi1,double malphaxi2, double xi2, double gamma,vec w){
+    signal(SIGSEGV, handler);   // install our handler
 	vec diff,g,grad,hess;
 	double mgamma = 1-gamma;
 	double imgamma = 1/mgamma;
@@ -67,6 +74,7 @@ vec u_work_neg(vec cons,double x,double alphaxi1,double malphaxi2, double xi2, d
 
 // alternative implementation of the function in ufuns.cpp
 Rcpp::List ufun_Atta_L2(mat Res, Rcpp::List par, uvec hsize, vec wage){
+    signal(SIGSEGV, handler);   // install our handler
 
 	int n = Res.n_rows;
 	int m = Res.n_cols;
@@ -200,6 +208,7 @@ throw std::logic_error( "ufun_Attanasio: hsize and Res are not equal rows!" );
 
 // utility with positive and negative consumption
 vec u_pos(vec c,vec lab,vec h,double alph,double gamm){
+    signal(SIGSEGV, handler);   // install our handler
 	double mgamm = 1-gamm;
 	double imgamm = 1/mgamm;
 	double g,z,y;
@@ -215,6 +224,7 @@ vec u_pos(vec c,vec lab,vec h,double alph,double gamm){
 
 // quadratic approximation function for case of no work for vector
 vec u_neg(vec c,double cuto,vec lab,vec h,double alph,double gamm){
+    signal(SIGSEGV, handler);   // install our handler
 	vec diff;
 	vec ret(c);
 	double grad,hess,y,z;
@@ -250,6 +260,7 @@ vec u_neg(vec c,double cuto,vec lab,vec h,double alph,double gamm){
 //' @return numeric matrix of utility values 
 // [[Rcpp::Export]]
 SEXP ufun_discreteL(mat Res, Rcpp::List par, uvec hsize, vec labor){
+    signal(SIGSEGV, handler);   // install our handler
 
 	BEGIN_RCPP
 

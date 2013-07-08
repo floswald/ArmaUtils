@@ -3,7 +3,25 @@
 using namespace Rcpp ;
 using namespace arma ;
 
+
+void baz() {
+ int *foo = (int*)-1; // make a bad pointer
+  printf("%d\n", *foo);       // causes segfault
+}
+
+void bar() { baz(); }
+void foo() { bar(); }
+
+SEXP boom( SEXP A_ ){
+
+    signal(SIGSEGV, handler);   // install our handler
+	foo();
+}
+
 SEXP armamax( SEXP X_){
+
+    signal(SIGSEGV, handler);   // install our handler
+	
 	// map R objects
 	arma::mat A  = Rcpp::as<arma::mat>(X_);	// map R matrix
 
@@ -24,6 +42,7 @@ SEXP armamax( SEXP X_){
 }
 
 SEXP armamax2( SEXP X_, SEXP B_ ){
+    signal(SIGSEGV, handler);   // install our handler
 	// map R objects
 	arma::mat A  = Rcpp::as<arma::mat>(X_);	// map R matrix
 	arma::uvec b = Rcpp::as<arma::uvec>(B_);	// map R index vector
@@ -54,6 +73,7 @@ SEXP armamax2( SEXP X_, SEXP B_ ){
 }
 
 SEXP armakron( SEXP y_, SEXP R_ ){
+    signal(SIGSEGV, handler);   // install our handler
 	// the following statement enables to pass error messages from cpp to R without a crash.
 	
 	BEGIN_RCPP

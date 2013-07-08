@@ -244,5 +244,8 @@ krons <- function( y, matrices ){
 }
 
 
+boom <- function(x){
+	.Call("boom",x,PACKAGE="ArmaUtils")
+}
 
 
